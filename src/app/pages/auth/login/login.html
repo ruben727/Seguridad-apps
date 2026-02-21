@@ -1,0 +1,30 @@
+<div class="flex justify-content-center align-items-center min-h-screen">
+  <p-card header="Iniciar Sesión" [style]="{ width: '400px' }">
+    
+    <div class="flex flex-column gap-4">
+      
+      <p-floatlabel>
+        <input pInputText id="email" [(ngModel)]="email" class="w-full" />
+        <label for="email">Correo electrónico</label>
+      </p-floatlabel>
+
+      <p-floatlabel>
+        <p-password id="password" [(ngModel)]="password" [feedback]="false" class="w-full" />
+        <label for="password">Contraseña</label>
+      </p-floatlabel>
+
+      <p-button 
+        label="Iniciar Sesión" 
+        icon="pi pi-sign-in" 
+        class="w-full"
+        (onClick)="iniciarSesion()" />
+
+      <p-button 
+        label="¿No tienes cuenta? Regístrate" 
+        variant="text" 
+        class="w-full" />
+
+    </div>
+
+  </p-card>
+</div>

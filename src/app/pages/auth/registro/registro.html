@@ -1,0 +1,40 @@
+<div class="flex justify-content-center align-items-center min-h-screen">
+  <p-card header="Crear Cuenta" [style]="{ width: '400px' }">
+
+    <div class="flex flex-column gap-4">
+
+      <p-floatlabel>
+        <input pInputText id="nombre" [(ngModel)]="nombre" class="w-full" />
+        <label for="nombre">Nombre completo</label>
+      </p-floatlabel>
+
+      <p-floatlabel>
+        <input pInputText id="email" [(ngModel)]="email" class="w-full" />
+        <label for="email">Correo electrónico</label>
+      </p-floatlabel>
+
+      <p-floatlabel>
+        <p-password id="password" [(ngModel)]="password" [feedback]="true" class="w-full" />
+        <label for="password">Contraseña</label>
+      </p-floatlabel>
+
+      <p-floatlabel>
+        <p-password id="confirmarPassword" [(ngModel)]="confirmarPassword" [feedback]="false" class="w-full" />
+        <label for="confirmarPassword">Confirmar contraseña</label>
+      </p-floatlabel>
+
+      <p-button
+        label="Registrarse"
+        icon="pi pi-user-plus"
+        class="w-full"
+        (onClick)="registrar()" />
+
+      <p-button
+        label="¿Ya tienes cuenta? Inicia Sesión"
+        variant="text"
+        class="w-full" />
+
+    </div>
+
+  </p-card>
+</div>
