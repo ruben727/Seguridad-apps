@@ -1,40 +1,113 @@
-<div class="flex justify-content-center align-items-center min-h-screen">
-  <p-card header="Crear Cuenta" [style]="{ width: '400px' }">
+<div class="flex justify-content-center align-items-center min-h-screen p-4">
+  <p-card header="Crear Cuenta" [style]="{ width: '480px' }">
 
-    <div class="flex flex-column gap-4">
+    <form [formGroup]="form" class="flex flex-column gap-4">
 
+      <!-- USUARIO -->
       <p-floatlabel>
-        <input pInputText id="nombre" [(ngModel)]="nombre" class="w-full" />
-        <label for="nombre">Nombre completo</label>
+        <input pInputText id="usuario" formControlName="usuario" class="w-full" />
+        <label for="usuario">Usuario</label>
       </p-floatlabel>
+      @if (error('usuario', 'required')) {
+        <p-message severity="error" text="El usuario es requerido." />
+      }
+      @if (error('usuario', 'minlength')) {
+        <p-message severity="error" text="El usuario debe tener al menos 4 caracteres." />
+      }
 
+      <!-- EMAIL -->
       <p-floatlabel>
-        <input pInputText id="email" [(ngModel)]="email" class="w-full" />
+        <input pInputText id="email" formControlName="email" class="w-full" />
         <label for="email">Correo electrónico</label>
       </p-floatlabel>
+      @if (error('email', 'required')) {
+        <p-message severity="error" text="El correo es requerido." />
+      }
+      @if (error('email', 'email')) {
+        <p-message severity="error" text="Ingresa un correo válido." />
+      }
 
+      <!-- NOMBRE COMPLETO -->
       <p-floatlabel>
-        <p-password id="password" [(ngModel)]="password" [feedback]="true" class="w-full" />
+        <input pInputText id="nombreCompleto" formControlName="nombreCompleto" class="w-full" />
+        <label for="nombreCompleto">Nombre completo</label>
+      </p-floatlabel>
+      @if (error('nombreCompleto', 'required')) {
+        <p-message severity="error" text="El nombre completo es requerido." />
+      }
+
+      <!-- DIRECCIÓN -->
+      <p-floatlabel>
+        <input pInputText id="direccion" formControlName="direccion" class="w-full" />
+        <label for="direccion">Dirección</label>
+      </p-floatlabel>
+      @if (error('direccion', 'required')) {
+        <p-message severity="error" text="La dirección es requerida." />
+      }
+
+      <!-- TELÉFONO -->
+      <p-floatlabel>
+        <input pInputText id="telefono" formControlName="telefono" class="w-full" />
+        <label for="telefono">Teléfono (10 dígitos)</label>
+      </p-floatlabel>
+      @if (error('telefono', 'required')) {
+        <p-message severity="error" text="El teléfono es requerido." />
+      }
+      @if (error('telefono', 'pattern')) {
+        <p-message severity="error" text="Solo números, exactamente 10 dígitos." />
+      }
+
+      <!-- FECHA NACIMIENTO -->
+      <p-floatlabel>
+        <p-datepicker id="fechaNacimiento" formControlName="fechaNacimiento" [maxDate]="maxFecha" dateFormat="dd/mm/yy" class="w-full" />
+        <label for="fechaNacimiento">Fecha de nacimiento</label>
+      </p-floatlabel>
+      @if (error('fechaNacimiento', 'required')) {
+        <p-message severity="error" text="La fecha de nacimiento es requerida." />
+      }
+      @if (error('fechaNacimiento', 'menorDeEdad')) {
+        <p-message severity="error" text="Debes ser mayor de 18 años para registrarte." />
+      }
+
+      <!-- CONTRASEÑA -->
+      <p-floatlabel>
+        <p-password id="password" formControlName="password" [feedback]="true" class="w-full" />
         <label for="password">Contraseña</label>
       </p-floatlabel>
+      @if (error('password', 'required')) {
+        <p-message severity="error" text="La contraseña es requerida." />
+      }
+      @if (error('password', 'pattern') || error('password', 'minlength')) {
+        <p-message severity="error" text="Mínimo 10 caracteres, mayúscula, minúscula, número y símbolo (!@#$%^&*)." />
+      }
 
+      <!-- CONFIRMAR CONTRASEÑA -->
       <p-floatlabel>
-        <p-password id="confirmarPassword" [(ngModel)]="confirmarPassword" [feedback]="false" class="w-full" />
+        <p-password id="confirmarPassword" formControlName="confirmarPassword" [feedback]="false" class="w-full" />
         <label for="confirmarPassword">Confirmar contraseña</label>
       </p-floatlabel>
+      @if (error('confirmarPassword', 'required')) {
+        <p-message severity="error" text="Confirma tu contraseña." />
+      }
+      @if (form.touched && form.hasError('noCoinciden')) {
+        <p-message severity="error" text="Las contraseñas no coinciden." />
+      }
 
+      <!-- BOTÓN -->
       <p-button
         label="Registrarse"
         icon="pi pi-user-plus"
         class="w-full"
+        [disabled]="form.invalid"
         (onClick)="registrar()" />
 
       <p-button
         label="¿Ya tienes cuenta? Inicia Sesión"
         variant="text"
-        class="w-full" />
+        class="w-full"
+        routerLink="/login" />
 
-    </div>
+    </form>
 
   </p-card>
 </div>

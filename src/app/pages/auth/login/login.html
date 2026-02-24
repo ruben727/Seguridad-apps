@@ -1,28 +1,41 @@
-<div class="flex justify-content-center align-items-center min-h-screen">
-  <p-card header="Iniciar Sesión" [style]="{ width: '400px' }">
-    
+<div class="flex justify-content-center align-items-center min-h-screen surface-ground">
+  <p-card [style]="{ width: '420px', borderRadius: '12px' }">
+
+    <div class="flex flex-column align-items-center gap-2 mb-4">
+      <i class="pi pi-lock text-primary" style="font-size: 2.5rem"></i>
+      <h2 class="m-0 text-900 font-bold">Iniciar Sesión</h2>
+      <p class="m-0 text-500 text-sm">Ingresa tus credenciales para continuar</p>
+    </div>
+
     <div class="flex flex-column gap-4">
-      
-      <p-floatlabel>
+
+      @if (errorMsg) {
+        <p-message severity="error" [text]="errorMsg" class="w-full" />
+      }
+
+      <p-floatlabel class="w-full">
         <input pInputText id="email" [(ngModel)]="email" class="w-full" />
         <label for="email">Correo electrónico</label>
       </p-floatlabel>
 
-      <p-floatlabel>
+      <p-floatlabel class="w-full">
         <p-password id="password" [(ngModel)]="password" [feedback]="false" class="w-full" />
         <label for="password">Contraseña</label>
       </p-floatlabel>
 
-      <p-button 
-        label="Iniciar Sesión" 
-        icon="pi pi-sign-in" 
+      <p-button
+        label="Iniciar Sesión"
+        icon="pi pi-sign-in"
+        iconPos="right"
         class="w-full"
         (onClick)="iniciarSesion()" />
 
-      <p-button 
-        label="¿No tienes cuenta? Regístrate" 
-        variant="text" 
-        class="w-full" />
+      <div class="flex justify-content-center">
+        <p-button
+          label="¿No tienes cuenta? Regístrate"
+          variant="text"
+          routerLink="/registro" />
+      </div>
 
     </div>
 
