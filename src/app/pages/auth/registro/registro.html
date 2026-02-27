@@ -1,7 +1,15 @@
-<div class="flex justify-content-center align-items-center min-h-screen p-4">
+<div class="flex justify-content-center align-items-center" style="min-height:100vh">
+
   <p-card header="Crear Cuenta" [style]="{ width: '480px' }">
 
-    <form [formGroup]="form" class="flex flex-column gap-4">
+    <form [formGroup]="form" class="flex flex-column gap-3">
+
+      <!-- MENSAJE GENERAL -->
+      @if (enviado && form.invalid) {
+        <p-message severity="error" text="Falta completar campos obligatorios correctamente."></p-message>
+      }
+
+      <p-divider></p-divider>
 
       <!-- USUARIO -->
       <p-floatlabel>
@@ -12,7 +20,7 @@
         <p-message severity="error" text="El usuario es requerido." />
       }
       @if (error('usuario', 'minlength')) {
-        <p-message severity="error" text="El usuario debe tener al menos 4 caracteres." />
+        <p-message severity="error" text="Mínimo 4 caracteres." />
       }
 
       <!-- EMAIL -->
@@ -24,16 +32,16 @@
         <p-message severity="error" text="El correo es requerido." />
       }
       @if (error('email', 'email')) {
-        <p-message severity="error" text="Ingresa un correo válido." />
+        <p-message severity="error" text="Correo no válido." />
       }
 
-      <!-- NOMBRE COMPLETO -->
+      <!-- NOMBRE -->
       <p-floatlabel>
         <input pInputText id="nombreCompleto" formControlName="nombreCompleto" class="w-full" />
         <label for="nombreCompleto">Nombre completo</label>
       </p-floatlabel>
       @if (error('nombreCompleto', 'required')) {
-        <p-message severity="error" text="El nombre completo es requerido." />
+        <p-message severity="error" text="Campo obligatorio." />
       }
 
       <!-- DIRECCIÓN -->
@@ -42,70 +50,90 @@
         <label for="direccion">Dirección</label>
       </p-floatlabel>
       @if (error('direccion', 'required')) {
-        <p-message severity="error" text="La dirección es requerida." />
+        <p-message severity="error" text="Campo obligatorio." />
       }
 
       <!-- TELÉFONO -->
       <p-floatlabel>
         <input pInputText id="telefono" formControlName="telefono" class="w-full" />
-        <label for="telefono">Teléfono (10 dígitos)</label>
+        <label for="telefono">Teléfono</label>
       </p-floatlabel>
       @if (error('telefono', 'required')) {
-        <p-message severity="error" text="El teléfono es requerido." />
+        <p-message severity="error" text="Campo obligatorio." />
       }
       @if (error('telefono', 'pattern')) {
-        <p-message severity="error" text="Solo números, exactamente 10 dígitos." />
+        <p-message severity="error" text="Debe tener 10 dígitos numéricos." />
       }
 
-      <!-- FECHA NACIMIENTO -->
+      <!-- FECHA -->
       <p-floatlabel>
-        <p-datepicker id="fechaNacimiento" formControlName="fechaNacimiento" [maxDate]="maxFecha" dateFormat="dd/mm/yy" class="w-full" />
-        <label for="fechaNacimiento">Fecha de nacimiento</label>
+        <p-datepicker
+          formControlName="fechaNacimiento"
+          [maxDate]="maxFecha"
+          dateFormat="dd/mm/yy"
+          class="w-full">
+        </p-datepicker>
+        <label>Fecha de nacimiento</label>
       </p-floatlabel>
       @if (error('fechaNacimiento', 'required')) {
-        <p-message severity="error" text="La fecha de nacimiento es requerida." />
+        <p-message severity="error" text="Campo obligatorio." />
       }
       @if (error('fechaNacimiento', 'menorDeEdad')) {
-        <p-message severity="error" text="Debes ser mayor de 18 años para registrarte." />
+        <p-message severity="error" text="Debes ser mayor de 18 años." />
       }
 
-      <!-- CONTRASEÑA -->
+      <!-- PASSWORD -->
       <p-floatlabel>
-        <p-password id="password" formControlName="password" [feedback]="true" class="w-full" />
-        <label for="password">Contraseña</label>
+        <p-password
+          formControlName="password"
+          [feedback]="true"
+          [toggleMask]="true"
+          class="w-full">
+        </p-password>
+        <label>Contraseña</label>
       </p-floatlabel>
       @if (error('password', 'required')) {
-        <p-message severity="error" text="La contraseña es requerida." />
+        <p-message severity="error" text="Campo obligatorio." />
       }
       @if (error('password', 'pattern') || error('password', 'minlength')) {
-        <p-message severity="error" text="Mínimo 10 caracteres, mayúscula, minúscula, número y símbolo (!@#$%^&*)." />
+        <p-message severity="error"
+          text="Mínimo 10 caracteres, mayúscula, minúscula, número y símbolo.">
+        </p-message>
       }
 
-      <!-- CONFIRMAR CONTRASEÑA -->
+      <!-- CONFIRMAR PASSWORD -->
       <p-floatlabel>
-        <p-password id="confirmarPassword" formControlName="confirmarPassword" [feedback]="false" class="w-full" />
-        <label for="confirmarPassword">Confirmar contraseña</label>
+        <p-password
+          formControlName="confirmarPassword"
+          [feedback]="false"
+          [toggleMask]="true"
+          class="w-full">
+        </p-password>
+        <label>Confirmar contraseña</label>
       </p-floatlabel>
       @if (error('confirmarPassword', 'required')) {
-        <p-message severity="error" text="Confirma tu contraseña." />
+        <p-message severity="error" text="Campo obligatorio." />
       }
-      @if (form.touched && form.hasError('noCoinciden')) {
+      @if ((enviado || form.touched) && form.hasError('noCoinciden')) {
         <p-message severity="error" text="Las contraseñas no coinciden." />
       }
+
+      <p-divider></p-divider>
 
       <!-- BOTÓN -->
       <p-button
         label="Registrarse"
         icon="pi pi-user-plus"
         class="w-full"
-        [disabled]="form.invalid"
-        (onClick)="registrar()" />
+        (onClick)="registrar()">
+      </p-button>
 
       <p-button
         label="¿Ya tienes cuenta? Inicia Sesión"
         variant="text"
         class="w-full"
-        routerLink="/login" />
+        routerLink="/login">
+      </p-button>
 
     </form>
 

@@ -6,12 +6,16 @@ import { CardModule } from 'primeng/card';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { PasswordModule } from 'primeng/password';
 import { MessageModule } from 'primeng/message';
-import { Router } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-login',
+  standalone: true,
   imports: [
+    CommonModule,
     FormsModule,
+    RouterModule,
     InputTextModule,
     ButtonModule,
     CardModule,
@@ -27,7 +31,6 @@ export class Login {
   password = '';
   errorMsg = '';
 
-  // Credenciales hardcodeadas
   private credenciales = {
     email: 'ruben@erp.com',
     password: 'Ruben@12345'
@@ -36,9 +39,19 @@ export class Login {
   constructor(private router: Router) {}
 
   iniciarSesion() {
-    if (this.email === this.credenciales.email && this.password === this.credenciales.password) {
+
+    if (!this.email || !this.password) {
+      this.errorMsg = 'Debes completar todos los campos.';
+      return;
+    }
+
+    if (this.email === this.credenciales.email &&
+        this.password === this.credenciales.password) {
+
       this.errorMsg = '';
-      this.router.navigate(['/dashboard']);
+
+      this.router.navigate(['/user/index']);
+
     } else {
       this.errorMsg = 'Correo o contraseña incorrectos.';
     }
