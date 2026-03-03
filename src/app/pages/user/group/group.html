@@ -1,15 +1,67 @@
 <div style="display:flex; height:100vh;">
 
+  <!-- SIDEBAR -->
   <div style="width:250px;">
     <app-sidebar></app-sidebar>
   </div>
 
-
+  <!-- CONTENIDO -->
   <div style="flex:1; padding:2rem;">
 
-    <p-card header="Welcome to Groups">
+    <p-card header="Gestión de Grupos">
 
-      <h2>Groups</h2>
+      <!-- HEADER INTERNO -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+        <h2>Lista de Grupos</h2>
+
+        <p-button
+          label="Nuevo Grupo"
+          icon="pi pi-plus"
+          severity="success">
+        </p-button>
+      </div>
+
+      <p-divider></p-divider>
+
+      <!-- TABLA VISUAL -->
+      <p-table
+        [value]="groups"
+        stripedRows
+        responsiveLayout="scroll"
+        [tableStyle]="{'min-width': '60rem'}">
+
+        <ng-template pTemplate="header">
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Usuarios</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-group>
+          <tr>
+            <td>{{ group.id }}</td>
+            <td>{{ group.nombre }}</td>
+            <td>{{ group.descripcion }}</td>
+            <td>{{ group.usuarios }}</td>
+            <td>
+              <p-tag
+                [value]="group.estado"
+                [severity]="group.estado === 'Activo' ? 'success' : 'danger'">
+              </p-tag>
+            </td>
+            <td>
+              <p-button icon="pi pi-pencil" text severity="info"></p-button>
+              <p-button icon="pi pi-trash" text severity="danger"></p-button>
+            </td>
+          </tr>
+        </ng-template>
+
+      </p-table>
+
     </p-card>
 
   </div>

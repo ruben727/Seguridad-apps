@@ -4,67 +4,74 @@
 
     <form [formGroup]="form" class="flex flex-column gap-3">
 
-      <!-- MENSAJE GENERAL -->
       @if (enviado && form.invalid) {
-        <p-message severity="error" text="Falta completar campos obligatorios correctamente."></p-message>
+        <p-message severity="error"
+          text="Falta completar campos obligatorios correctamente.">
+        </p-message>
       }
 
       <p-divider></p-divider>
+      <br>
 
       <!-- USUARIO -->
       <p-floatlabel>
-        <input pInputText id="usuario" formControlName="usuario" class="w-full" />
-        <label for="usuario">Usuario</label>
+        <input pInputText formControlName="usuario" class="w-full" />
+        <label>Usuario</label>
       </p-floatlabel>
-      @if (error('usuario', 'required')) {
-        <p-message severity="error" text="El usuario es requerido." />
+
+      @if (error('usuario','required') || error('usuario','soloEspacios')) {
+        <p-message severity="error" text="El usuario es obligatorio." />
       }
-      @if (error('usuario', 'minlength')) {
+      @if (error('usuario','minlength')) {
         <p-message severity="error" text="Mínimo 4 caracteres." />
       }
-
+<br>
       <!-- EMAIL -->
       <p-floatlabel>
-        <input pInputText id="email" formControlName="email" class="w-full" />
-        <label for="email">Correo electrónico</label>
+        <input pInputText formControlName="email" class="w-full" />
+        <label>Correo electrónico</label>
       </p-floatlabel>
-      @if (error('email', 'required')) {
-        <p-message severity="error" text="El correo es requerido." />
+
+      @if (error('email','required') || error('email','soloEspacios')) {
+        <p-message severity="error" text="Correo obligatorio." />
       }
-      @if (error('email', 'email')) {
+      @if (error('email','email')) {
         <p-message severity="error" text="Correo no válido." />
       }
-
+<br>
       <!-- NOMBRE -->
       <p-floatlabel>
-        <input pInputText id="nombreCompleto" formControlName="nombreCompleto" class="w-full" />
-        <label for="nombreCompleto">Nombre completo</label>
+        <input pInputText formControlName="nombreCompleto" class="w-full" />
+        <label>Nombre completo</label>
       </p-floatlabel>
-      @if (error('nombreCompleto', 'required')) {
+
+      @if (error('nombreCompleto','required') || error('nombreCompleto','soloEspacios')) {
         <p-message severity="error" text="Campo obligatorio." />
       }
-
+<br>
       <!-- DIRECCIÓN -->
       <p-floatlabel>
-        <input pInputText id="direccion" formControlName="direccion" class="w-full" />
-        <label for="direccion">Dirección</label>
+        <input pInputText formControlName="direccion" class="w-full" />
+        <label>Dirección</label>
       </p-floatlabel>
-      @if (error('direccion', 'required')) {
+
+      @if (error('direccion','required') || error('direccion','soloEspacios')) {
         <p-message severity="error" text="Campo obligatorio." />
       }
-
+<br>
       <!-- TELÉFONO -->
       <p-floatlabel>
-        <input pInputText id="telefono" formControlName="telefono" class="w-full" />
-        <label for="telefono">Teléfono</label>
+        <input pInputText formControlName="telefono" class="w-full" />
+        <label>Teléfono</label>
       </p-floatlabel>
-      @if (error('telefono', 'required')) {
+
+      @if (error('telefono','required')) {
         <p-message severity="error" text="Campo obligatorio." />
       }
-      @if (error('telefono', 'pattern')) {
+      @if (error('telefono','pattern')) {
         <p-message severity="error" text="Debe tener 10 dígitos numéricos." />
       }
-
+<br>
       <!-- FECHA -->
       <p-floatlabel>
         <p-datepicker
@@ -75,13 +82,14 @@
         </p-datepicker>
         <label>Fecha de nacimiento</label>
       </p-floatlabel>
-      @if (error('fechaNacimiento', 'required')) {
+
+      @if (error('fechaNacimiento','required')) {
         <p-message severity="error" text="Campo obligatorio." />
       }
-      @if (error('fechaNacimiento', 'menorDeEdad')) {
+      @if (error('fechaNacimiento','menorDeEdad')) {
         <p-message severity="error" text="Debes ser mayor de 18 años." />
       }
-
+<br>
       <!-- PASSWORD -->
       <p-floatlabel>
         <p-password
@@ -92,16 +100,17 @@
         </p-password>
         <label>Contraseña</label>
       </p-floatlabel>
-      @if (error('password', 'required')) {
-        <p-message severity="error" text="Campo obligatorio." />
+
+      @if (error('password','required') || error('password','soloEspacios')) {
+        <p-message severity="error" text="Contraseña obligatoria." />
       }
-      @if (error('password', 'pattern') || error('password', 'minlength')) {
+      @if (error('password','pattern') || error('password','minlength')) {
         <p-message severity="error"
           text="Mínimo 10 caracteres, mayúscula, minúscula, número y símbolo.">
         </p-message>
       }
-
-      <!-- CONFIRMAR PASSWORD -->
+<br>
+      <!-- CONFIRMAR -->
       <p-floatlabel>
         <p-password
           formControlName="confirmarPassword"
@@ -111,8 +120,9 @@
         </p-password>
         <label>Confirmar contraseña</label>
       </p-floatlabel>
-      @if (error('confirmarPassword', 'required')) {
-        <p-message severity="error" text="Campo obligatorio." />
+
+      @if (error('confirmarPassword','required') || error('confirmarPassword','soloEspacios')) {
+        <p-message severity="error" text="Confirma tu contraseña." />
       }
       @if ((enviado || form.touched) && form.hasError('noCoinciden')) {
         <p-message severity="error" text="Las contraseñas no coinciden." />
@@ -120,7 +130,6 @@
 
       <p-divider></p-divider>
 
-      <!-- BOTÓN -->
       <p-button
         label="Registrarse"
         icon="pi pi-user-plus"

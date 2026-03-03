@@ -1,7 +1,13 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CardModule } from 'primeng/card';
 import { SidebarComponent } from '../../../components/sidebar/sidebar';
+
+import { CardModule } from 'primeng/card';
+import { ButtonModule } from 'primeng/button';
+import { DividerModule } from 'primeng/divider';
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { InputTextModule } from 'primeng/inputtext';
+import { DatePickerModule } from 'primeng/datepicker';
 
 @Component({
   selector: 'app-profile',
@@ -9,7 +15,12 @@ import { SidebarComponent } from '../../../components/sidebar/sidebar';
   imports: [
     CommonModule,
     SidebarComponent,
-    CardModule
+    CardModule,
+    ButtonModule,
+    DividerModule,
+    FloatLabelModule,
+    InputTextModule,
+    DatePickerModule
   ],
   templateUrl: './profile.html',
 })

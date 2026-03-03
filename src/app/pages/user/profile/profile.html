@@ -1,15 +1,96 @@
 <div style="display:flex; height:100vh;">
 
+  <!-- SIDEBAR -->
   <div style="width:250px;">
     <app-sidebar></app-sidebar>
   </div>
 
-
+  <!-- CONTENIDO -->
   <div style="flex:1; padding:2rem;">
 
-    <p-card header="Welcome to profile">
+    <p-card header="Perfil de Usuario">
 
-      <h2>Profile Ruben</h2>
+      <!-- Header interno -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+        <h2>Actualizar Información</h2>
+
+        <p-button
+          label="Guardar Cambios"
+          icon="pi pi-save"
+          severity="success">
+        </p-button>
+      </div>
+
+      <p-divider></p-divider>
+
+      <!-- FORMULARIO VISUAL -->
+      <div class="p-fluid">
+
+        <div style="margin-bottom:1.5rem;">
+          <p-floatlabel>
+            <input pInputText id="usuario" class="w-full" />
+            <label for="usuario">Usuario</label>
+          </p-floatlabel>
+        </div>
+
+        <div style="margin-bottom:1.5rem;">
+          <p-floatlabel>
+            <input pInputText id="email" class="w-full" />
+            <label for="email">Correo Electrónico</label>
+          </p-floatlabel>
+        </div>
+
+        <div style="margin-bottom:1.5rem;">
+          <p-floatlabel>
+            <input pInputText id="nombre" class="w-full" />
+            <label for="nombre">Nombre Completo</label>
+          </p-floatlabel>
+        </div>
+
+        <div style="margin-bottom:1.5rem;">
+          <p-floatlabel>
+            <input pInputText id="direccion" class="w-full" />
+            <label for="direccion">Dirección</label>
+          </p-floatlabel>
+        </div>
+
+        <div style="margin-bottom:1.5rem;">
+          <p-floatlabel>
+            <input pInputText id="telefono" class="w-full" />
+            <label for="telefono">Teléfono</label>
+          </p-floatlabel>
+        </div>
+
+        <div style="margin-bottom:1.5rem;">
+          <p-floatlabel>
+            <p-datepicker
+              dateFormat="dd/mm/yy"
+              class="w-full">
+            </p-datepicker>
+            <label>Fecha de Nacimiento</label>
+          </p-floatlabel>
+        </div>
+
+      </div>
+
+      <p-divider></p-divider>
+
+      <!-- BOTONES INFERIORES -->
+      <div style="display:flex; gap:1rem;">
+        <p-button
+          label="Cambiar Contraseña"
+          icon="pi pi-key"
+          severity="help">
+        </p-button>
+
+        <p-button
+          label="Cancelar"
+          icon="pi pi-times"
+          severity="secondary"
+          variant="outlined">
+        </p-button>
+      </div>
+
     </p-card>
 
   </div>
