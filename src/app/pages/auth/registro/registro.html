@@ -11,7 +11,7 @@
       }
 
       <p-divider></p-divider>
-      <br>
+    
 
       <!-- USUARIO -->
       <p-floatlabel>
@@ -25,7 +25,7 @@
       @if (error('usuario','minlength')) {
         <p-message severity="error" text="Mínimo 4 caracteres." />
       }
-<br>
+
       <!-- EMAIL -->
       <p-floatlabel>
         <input pInputText formControlName="email" class="w-full" />
@@ -38,7 +38,7 @@
       @if (error('email','email')) {
         <p-message severity="error" text="Correo no válido." />
       }
-<br>
+
       <!-- NOMBRE -->
       <p-floatlabel>
         <input pInputText formControlName="nombreCompleto" class="w-full" />
@@ -48,7 +48,7 @@
       @if (error('nombreCompleto','required') || error('nombreCompleto','soloEspacios')) {
         <p-message severity="error" text="Campo obligatorio." />
       }
-<br>
+
       <!-- DIRECCIÓN -->
       <p-floatlabel>
         <input pInputText formControlName="direccion" class="w-full" />
@@ -58,7 +58,7 @@
       @if (error('direccion','required') || error('direccion','soloEspacios')) {
         <p-message severity="error" text="Campo obligatorio." />
       }
-<br>
+
       <!-- TELÉFONO -->
       <p-floatlabel>
         <input pInputText formControlName="telefono" class="w-full" />
@@ -71,7 +71,7 @@
       @if (error('telefono','pattern')) {
         <p-message severity="error" text="Debe tener 10 dígitos numéricos." />
       }
-<br>
+
       <!-- FECHA -->
       <p-floatlabel>
         <p-datepicker
@@ -89,7 +89,6 @@
       @if (error('fechaNacimiento','menorDeEdad')) {
         <p-message severity="error" text="Debes ser mayor de 18 años." />
       }
-<br>
       <!-- PASSWORD -->
       <p-floatlabel>
         <p-password
@@ -109,7 +108,6 @@
           text="Mínimo 10 caracteres, mayúscula, minúscula, número y símbolo.">
         </p-message>
       }
-<br>
       <!-- CONFIRMAR -->
       <p-floatlabel>
         <p-password

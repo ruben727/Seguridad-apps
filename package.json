@@ -1,6 +1,8 @@
+
 {
   "name": "erp-ruben",
   "version": "0.0.0",
+  "author": "Ruben",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",

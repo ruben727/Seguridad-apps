@@ -10,53 +10,78 @@
 
     <p-card header="Perfil de Usuario">
 
-      <!-- Header interno -->
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
         <h2>Actualizar Información</h2>
 
         <p-button
           label="Guardar Cambios"
           icon="pi pi-save"
-          severity="success">
+          severity="success"
+          (onClick)="guardar()">
         </p-button>
       </div>
 
       <p-divider></p-divider>
 
-      <!-- FORMULARIO VISUAL -->
+      @if (mensaje) {
+        <p-message severity="success" [text]="mensaje"></p-message>
+      }
+
+      <br>
+
       <div class="p-fluid">
 
         <div style="margin-bottom:1.5rem;">
           <p-floatlabel>
-            <input pInputText id="usuario" class="w-full" />
+            <input
+              pInputText
+              id="usuario"
+              [(ngModel)]="usuario.usuario"
+              class="w-full"/>
             <label for="usuario">Usuario</label>
           </p-floatlabel>
         </div>
 
         <div style="margin-bottom:1.5rem;">
           <p-floatlabel>
-            <input pInputText id="email" class="w-full" />
+            <input
+              pInputText
+              id="email"
+              [(ngModel)]="usuario.email"
+              class="w-full"/>
             <label for="email">Correo Electrónico</label>
           </p-floatlabel>
         </div>
 
         <div style="margin-bottom:1.5rem;">
           <p-floatlabel>
-            <input pInputText id="nombre" class="w-full" />
+            <input
+              pInputText
+              id="nombre"
+              [(ngModel)]="usuario.nombre"
+              class="w-full"/>
             <label for="nombre">Nombre Completo</label>
           </p-floatlabel>
         </div>
 
         <div style="margin-bottom:1.5rem;">
           <p-floatlabel>
-            <input pInputText id="direccion" class="w-full" />
+            <input
+              pInputText
+              id="direccion"
+              [(ngModel)]="usuario.direccion"
+              class="w-full"/>
             <label for="direccion">Dirección</label>
           </p-floatlabel>
         </div>
 
         <div style="margin-bottom:1.5rem;">
           <p-floatlabel>
-            <input pInputText id="telefono" class="w-full" />
+            <input
+              pInputText
+              id="telefono"
+              [(ngModel)]="usuario.telefono"
+              class="w-full"/>
             <label for="telefono">Teléfono</label>
           </p-floatlabel>
         </div>
@@ -64,6 +89,7 @@
         <div style="margin-bottom:1.5rem;">
           <p-floatlabel>
             <p-datepicker
+              [(ngModel)]="usuario.fechaNacimiento"
               dateFormat="dd/mm/yy"
               class="w-full">
             </p-datepicker>
@@ -75,8 +101,8 @@
 
       <p-divider></p-divider>
 
-      <!-- BOTONES INFERIORES -->
       <div style="display:flex; gap:1rem;">
+
         <p-button
           label="Cambiar Contraseña"
           icon="pi pi-key"
@@ -89,6 +115,7 @@
           severity="secondary"
           variant="outlined">
         </p-button>
+
       </div>
 
     </p-card>
