@@ -1,0 +1,37 @@
+<div style="display:flex; height:100vh;">
+<div style="width:250px;">
+    <app-sidebar></app-sidebar>
+  </div>
+
+<p-card header="Crear Ticket">
+    
+
+<div class="flex flex-column gap-3">
+
+<input
+pInputText
+placeholder="Titulo"
+[(ngModel)]="title">
+
+<textarea
+rows="5"
+class="p-inputtext p-component w-full"
+[(ngModel)]="description"
+placeholder="Descripción">
+</textarea>
+
+<p-select
+[options]="priorities"
+[(ngModel)]="priority"
+placeholder="Prioridad">
+</p-select>
+
+<p-button
+label="Crear"
+(click)="create()">
+</p-button>
+
+</div>
+
+</p-card>
+</div>

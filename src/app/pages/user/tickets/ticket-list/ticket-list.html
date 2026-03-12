@@ -1,0 +1,43 @@
+<div style="display:flex; height:100vh;">
+<div style="width:250px;">
+    <app-sidebar></app-sidebar>
+  </div>
+
+<p-table
+[value]="tickets"
+paginator
+[rows]="10">
+
+<ng-template pTemplate="header">
+
+<tr>
+
+<th>ID</th>
+<th>Titulo</th>
+<th>Estado</th>
+<th>Asignado</th>
+<th>Prioridad</th>
+<th>Fecha limite</th>
+
+</tr>
+
+</ng-template>
+
+<ng-template pTemplate="body" let-ticket>
+
+<tr>
+
+<td>{{ticket.id}}</td>
+<td>{{ticket.title}}</td>
+<td>{{ticket.status}}</td>
+<td>{{ticket.assignedTo}}</td>
+<td>{{ticket.priority}}</td>
+<td>{{ticket.dueDate}}</td>
+
+</tr>
+
+</ng-template>
+
+</p-table>
+
+</div>

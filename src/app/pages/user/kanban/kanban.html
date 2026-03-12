@@ -1,0 +1,73 @@
+<div class="grid">
+
+<div class="col">
+
+<h3>Pendiente</h3>
+
+<div *ngFor="let t of pending">
+
+<p-card>
+
+<h4>{{t.title}}</h4>
+
+<p-tag [value]="t.priority"></p-tag>
+
+</p-card>
+
+</div>
+
+</div>
+
+<div class="col">
+
+<h3>Progreso</h3>
+
+<div *ngFor="let t of progress">
+
+<p-card>
+
+<h4>{{t.title}}</h4>
+
+<p-tag [value]="t.priority"></p-tag>
+
+</p-card>
+
+</div>
+
+</div>
+
+<div class="col">
+
+<h3>Revision</h3>
+
+<div *ngFor="let t of review">
+
+<p-card>
+
+<h4>{{t.title}}</h4>
+
+<p-tag [value]="t.priority"></p-tag>
+
+</p-card>
+
+</div>
+
+</div>
+
+<div class="col">
+
+<h3>Hecho</h3>
+
+<div *ngFor="let t of done">
+
+<p-card>
+
+<h4>{{t.title}}</h4>
+
+</p-card>
+
+</div>
+
+</div>
+
+</div>

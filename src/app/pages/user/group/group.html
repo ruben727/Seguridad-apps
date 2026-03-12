@@ -6,189 +6,76 @@
   </div>
 
   <!-- CONTENIDO -->
-  <div style="flex:1; padding:2rem;">
+  <div style="flex:1; padding:20px; overflow:auto;">
 
-    <p-card header="Gestión de Grupos">
+    <!-- CARDS -->
+    <div class="grid">
 
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-        <h2>Lista de Grupos</h2>
-
-        <p-button
-          label="Nuevo Grupo"
-          icon="pi pi-plus"
-          severity="success"
-          (onClick)="abrirNuevo()">
-        </p-button>
-
-        <p-button
-          label="Nuevo Ticket"
-          icon="pi pi-plus"
-          severity="success"
-          (onClick)="abrirNuevo()">
-        </p-button>
+      <div class="col-12 md:col-3">
+        <p-card header="Total">
+          <h2>{{total}}</h2>
+        </p-card>
       </div>
 
-      <p-divider></p-divider>
+      <div class="col-12 md:col-3">
+        <p-card header="Pendiente">
+          <h2>{{pending}}</h2>
+        </p-card>
+      </div>
 
-   
-      <p-table
-        [value]="groups"
-        stripedRows
-        responsiveLayout="scroll"
-        [tableStyle]="{'min-width':'75rem'}">
+      <div class="col-12 md:col-3">
+        <p-card header="Progreso">
+          <h2>{{progress}}</h2>
+        </p-card>
+      </div>
 
-        <ng-template pTemplate="header">
-          <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Categoría</th>
-            <th>Nivel</th>
-            <th>Autor</th>
-            <th>Miembros</th>
-            <th>Tickets</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-          </tr>
-        </ng-template>
+      <div class="col-12 md:col-3">
+        <p-card header="Hecho">
+          <h2>{{done}}</h2>
+        </p-card>
+      </div>
 
-        <ng-template pTemplate="body" let-group>
-          <tr>
+    </div>
 
-            <td>{{group.id}}</td>
+    <p-divider></p-divider>
 
-            <td>{{group.nombre}}</td>
+    <!-- BOTON -->
+    <p-button
+      label="Crear Ticket"
+      icon="pi pi-plus"
+      (click)="createTicket()">
+    </p-button>
 
-            <td>{{group.categoria}}</td>
+    <br><br>
 
-            <td>
-              <p-tag
-                [value]="group.nivel"
-                [severity]="
-                  group.nivel === 'Alto' ? 'danger' :
-                  group.nivel === 'Medio' ? 'warn' :
-                  'success'
-                ">
-              </p-tag>
-            </td>
+    <!-- TABLA -->
+    <p-table
+      [value]="tickets"
+      paginator
+      [rows]="5">
 
-            <td>{{group.autor}}</td>
+      <ng-template pTemplate="header">
+        <tr>
+          <th>ID</th>
+          <th>Titulo</th>
+          <th>Estado</th>
+          <th>Asignado</th>
+          <th>Prioridad</th>
+        </tr>
+      </ng-template>
 
-            <td>{{group.miembros}}</td>
+      <ng-template pTemplate="body" let-ticket>
+        <tr>
+          <td>{{ticket.id}}</td>
+          <td>{{ticket.title}}</td>
+          <td>{{ticket.status}}</td>
+          <td>{{ticket.assignedTo}}</td>
+          <td>{{ticket.priority}}</td>
+        </tr>
+      </ng-template>
 
-            <td>
-              <p-tag [value]="group.tickets" severity="info"></p-tag>
-            </td>
-
-            <td>
-              <p-tag
-                [value]="group.estado"
-                [severity]="group.estado === 'Activo' ? 'success' : 'danger'">
-              </p-tag>
-            </td>
-
-            <td>
-
-              <p-button
-                icon="pi pi-pencil"
-                text
-                severity="info"
-                (onClick)="editarGrupo(group)">
-              </p-button>
-
-              <p-button
-                icon="pi pi-ban"
-                text
-                severity="danger"
-                *ngIf="group.estado === 'Activo'"
-                (onClick)="cambiarEstado(group)">
-              </p-button>
-
-              <p-button
-                icon="pi pi-check"
-                text
-                severity="success"
-                *ngIf="group.estado === 'Inactivo'"
-                (onClick)="cambiarEstado(group)">
-              </p-button>
-
-            </td>
-
-          </tr>
-        </ng-template>
-
-      </p-table>
-
-    </p-card>
+    </p-table>
 
   </div>
 
 </div>
-
-
-<!-- DIALOG NUEVO / EDITAR -->
-
-<p-dialog
-  [(visible)]="mostrarDialog"
-  [modal]="true"
-  [style]="{width:'400px'}"
-  header="Grupo">
-
-  <div class="flex flex-column gap-3">
-
-    <p-floatlabel>
-      <input pInputText [(ngModel)]="grupoActual.nombre"/>
-      <label>Nombre</label>
-    </p-floatlabel>
-
-    <p-floatlabel>
-      <input pInputText [(ngModel)]="grupoActual.categoria"/>
-      <label>Categoría</label>
-    </p-floatlabel>
-
-    <p-floatlabel>
-      <input pInputText [(ngModel)]="grupoActual.nivel"/>
-      <label>Nivel</label>
-    </p-floatlabel>
-
-    <p-floatlabel>
-      <input pInputText [(ngModel)]="grupoActual.autor"/>
-      <label>Autor</label>
-    </p-floatlabel>
-
-    <p-floatlabel>
-      <input pInputText type="number" [(ngModel)]="grupoActual.miembros"/>
-      <label>Miembros</label>
-    </p-floatlabel>
-
-    <p-floatlabel>
-      <input pInputText type="number" [(ngModel)]="grupoActual.tickets"/>
-      <label>Tickets</label>
-    </p-floatlabel>
-
-  </div>
-
-  <ng-template pTemplate="footer">
-
-    <p-button
-      label="Cancelar"
-      severity="secondary"
-      (onClick)="mostrarDialog=false">
-    </p-button>
-
-    <p-button
-      label="Guardar"
-      severity="success"
-      (onClick)="guardarGrupo()">
-    </p-button>
-
-  </ng-template>
-
-</p-dialog>
-
-
-
-
-
-
-
-    

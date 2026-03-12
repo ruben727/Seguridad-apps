@@ -9,7 +9,6 @@ import { TagModule } from 'primeng/tag';
 import { Router } from '@angular/router';
 
 import { DividerModule } from 'primeng/divider';
-import { SidebarComponent } from '../../../components/sidebar/sidebar';
 
 @Component({
 selector:'app-dashboard',
@@ -20,12 +19,11 @@ CardModule,
 ButtonModule,
 TableModule,
 TagModule,
-DividerModule,
-SidebarComponent
+DividerModule
 ],
-templateUrl:'./group.html'
+templateUrl:'./dashboard.html'
 })
-export class Group implements OnInit{
+export class Dashboard implements OnInit{
 
 tickets:any[]=[]
 

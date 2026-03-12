@@ -1,66 +1,100 @@
-<p-panel style="height: 100vh">
+<p-panel style="height:100vh">
 
-  <!-- HEADER -->
-  <ng-template pTemplate="header">
-    <div style="text-align:center; font-weight:bold;">
-      ERP_Ruben
-    </div>
-  </ng-template>
+<ng-template pTemplate="header">
 
-  <!-- MENU -->
-  <div class="p-fluid flex flex-column gap-2">
+<div style="text-align:center;font-weight:bold">
+ERP_Ruben
+</div>
 
-    <!-- INICIO -->
-    <button 
-      pButton 
-      type="button" 
-      label="Home" 
-      icon="pi pi-home"
-      class="p-button-text"
-      routerLink="/user/index">
-    </button>
+</ng-template>
 
-    <p-divider></p-divider>
+<div class="flex flex-column gap-2">
 
-    <!-- PROFILE -->
-    <button 
-      pButton 
-      type="button" 
-      label="Profile" 
-      icon="pi pi-user"
-      class="p-button-text"
-      routerLink="/user/profile">
-    </button>
+<button
+pButton
+label="Dashboard"
+icon="pi pi-home"
+class="p-button-text"
+routerLink="/user/index">
+</button>
 
-    <p-divider></p-divider>
+<p-divider></p-divider>
 
-    <!-- GROUP -->
-    <button 
-      pButton 
-      type="button" 
-      label="Group" 
-      icon="pi pi-users"
-      class="p-button-text"
-      routerLink="/user/group">
-    </button>
- 
-    <p-divider></p-divider>
-    
-    <button 
-      pButton 
-      type="button" 
-      label="Logout" 
-      icon="pi pi-users"
-      class="p-button-text"
-      routerLink="">
-    </button>
-  </div>
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-  <!-- FOOTER -->
-  <ng-template pTemplate="footer">
-    <div style="text-align:center;">
-      Version 1.4
-    </div>
-  </ng-template>
+<!-- CREAR TICKET -->
+
+<button
+*ngIf="perm.hasPermission('CREATE_TICKET')"
+pButton
+label="Crear Ticket"
+icon="pi pi-plus"
+class="p-button-text"
+routerLink="/user/tickets/create">
+</button>
+
+<p-divider *ngIf="perm.hasPermission('CREATE_TICKET')"></p-divider>
+
+<!-- VER TICKETS -->
+
+<button
+*ngIf="perm.hasPermission('VIEW_TICKET')"
+pButton
+label="Tickets"
+icon="pi pi-ticket"
+class="p-button-text"
+routerLink="/user/tickets">
+</button>
+
+<p-divider *ngIf="perm.hasPermission('VIEW_TICKET')"></p-divider>
+
+<button
+pButton
+label="Profile"
+icon="pi pi-user"
+class="p-button-text"
+routerLink="/user/profile">
+</button>
+
+<p-divider></p-divider>
+
+<button
+pButton
+label="Groups"
+icon="pi pi-users"
+class="p-button-text"
+routerLink="/user/group">
+</button>
+
+<p-divider></p-divider>
+
+<!-- ADMIN USUARIOS -->
+
+<button
+*ngIf="perm.hasPermission('EDIT_USERS')"
+pButton
+label="Permisos"
+icon="pi pi-shield"
+class="p-button-text"
+routerLink="/user/Admin">
+</button>
+
+<p-divider *ngIf="perm.hasPermission('EDIT_USERS')"></p-divider>
+
+<button
+pButton
+label="Logout"
+icon="pi pi-sign-out"
+class="p-button-text"
+routerLink="/">
+</button>
+
+</div>
+
+<ng-template pTemplate="footer">
+
+<div style="text-align:center">
+Version 1.4
+</div>
+
+</ng-template>
 
 </p-panel>

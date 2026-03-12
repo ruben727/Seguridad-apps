@@ -1,0 +1,84 @@
+<div class="grid">
+
+<div class="col-3">
+
+<p-card header="Total">
+
+<h2>{{total}}</h2>
+
+</p-card>
+
+</div>
+
+<div class="col-3">
+
+<p-card header="Pendiente">
+
+<h2>{{pending}}</h2>
+
+</p-card>
+
+</div>
+
+<div class="col-3">
+
+<p-card header="Progreso">
+
+<h2>{{progress}}</h2>
+
+</p-card>
+
+</div>
+
+<div class="col-3">
+
+<p-card header="Hecho">
+
+<h2>{{done}}</h2>
+
+</p-card>
+
+</div>
+
+</div>
+
+<p-divider></p-divider>
+
+<p-button
+label="Crear Ticket"
+icon="pi pi-plus"
+(click)="createTicket()">
+</p-button>
+
+<p-table
+[value]="tickets"
+paginator
+[rows]="5">
+
+<ng-template pTemplate="header">
+
+<tr>
+<th>ID</th>
+<th>Titulo</th>
+<th>Estado</th>
+<th>Asignado</th>
+<th>Prioridad</th>
+</tr>
+
+</ng-template>
+
+<ng-template pTemplate="body" let-ticket>
+
+<tr>
+
+<td>{{ticket.id}}</td>
+<td>{{ticket.title}}</td>
+<td>{{ticket.status}}</td>
+<td>{{ticket.assignedTo}}</td>
+<td>{{ticket.priority}}</td>
+
+</tr>
+
+</ng-template>
+
+</p-table>

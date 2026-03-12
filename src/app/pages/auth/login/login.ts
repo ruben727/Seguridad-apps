@@ -35,16 +35,6 @@ export class Login {
   password = '';
   errorMsg = '';
 
-  private credenciales = {
-    usuario: 'ruben',
-    email: 'ruben@erp.com',
-    password: 'Ruben@12345',
-    nombre: 'Rubén Mendoza',
-    direccion: 'Querétaro, México',
-    telefono: '4421234567',
-    fechaNacimiento: '2000-05-10'
-  };
-
   constructor(
     private router: Router,
     private messageService: MessageService
@@ -57,25 +47,67 @@ export class Login {
       return;
     }
 
-    if (this.email === this.credenciales.email &&
-        this.password === this.credenciales.password) {
+    // OBTENER USUARIOS
+    let users = JSON.parse(localStorage.getItem('usersERP') || '[]');
 
-      this.errorMsg = '';
+    // SI NO EXISTEN USUARIOS LOS CREA
+    if (users.length === 0) {
 
-      localStorage.setItem('usuarioERP', JSON.stringify(this.credenciales));
+      users = [
+
+        {
+          name: 'superAdmin',
+          email: 'admin@erp.com',
+          password: 'Admin@123',
+          role: 'superAdmin',
+          permissions: [
+            'VIEW_TICKET',
+            'CREATE_TICKET',
+            'EDIT_TICKET',
+            'DELETE_TICKET',
+            'VIEW_USERS',
+            'EDIT_USERS'
+          ]
+        },
+
+        {
+          name: 'user1',
+          email: 'user@erp.com',
+          password: 'User@123',
+          role: 'user',
+          permissions: ['VIEW_TICKET']
+        }
+
+      ];
+
+      localStorage.setItem('usersERP', JSON.stringify(users));
+    }
+
+    const usuario = users.find((u: any) =>
+      u.email === this.email &&
+      u.password === this.password
+    );
+
+    if (usuario) {
+
+      localStorage.setItem('usuarioERP', JSON.stringify(usuario));
 
       this.messageService.add({
         severity: 'success',
         summary: 'Bienvenido',
-        detail: 'Inicio de sesión correcto'
+        detail: usuario.name
       });
 
       setTimeout(() => {
         this.router.navigate(['/user/index']);
-      }, 1500);
+      }, 1000);
 
     } else {
-      this.errorMsg = 'Correo o contraseña incorrectos.';
+
+      this.errorMsg = 'Correo o contraseña incorrectos';
+
     }
+
   }
+
 }
