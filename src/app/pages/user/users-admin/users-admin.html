@@ -1,59 +1,384 @@
-<div style="display:flex;height:100vh">
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
 
-<div style="width:250px">
-<app-sidebar></app-sidebar>
-</div>
-
-<div style="flex:1;padding:20px">
-
-<h2>Gestión de Usuarios</h2>
-
-<p-table [value]="users">
-
-<ng-template pTemplate="header">
-
-<tr>
-
-<th>Usuario</th>
-<th>Email</th>
-<th>Rol</th>
-
-<th *ngFor="let p of permissions">
-{{p}}
-</th>
-
-</tr>
-
-</ng-template>
-
-<ng-template pTemplate="body" let-user>
-
-<tr>
-
-<td>{{user.name}}</td>
-<td>{{user.email}}</td>
-<td>{{user.role}}</td>
-
-<td *ngFor="let p of permissions">
-
-<p-checkbox
-
-[disabled]="user.role==='superAdmin'"
-
-[ngModel]="user.permissions.includes(p)"
-
-(onChange)="togglePermission(user,p)">
-
-</p-checkbox>
-
-</td>
-
-</tr>
-
-</ng-template>
-
-</p-table>
-
-</div>
-
+<div class="layout">
+  
+  <div class="sidebar">
+    <app-sidebar></app-sidebar>
+  </div>
+  
+  <div class="content p-4">
+    
+    <!-- Header -->
+    <div class="flex justify-content-between align-items-center mb-4">
+      <div class="flex align-items-center gap-2">
+        <i class="pi pi-shield text-primary" style="font-size: 2rem"></i>
+        <div>
+          <h1 class="m-0 text-2xl font-bold">Administración de Usuarios</h1>
+          <small class="text-600">Gestiona usuarios y sus permisos</small>
+        </div>
+      </div>
+      
+      <div class="flex gap-2">
+        <p-button
+          *ngIf="hasPermission('CREATE_USER')"
+          label="Nuevo Usuario"
+          icon="pi pi-user-plus"
+          severity="success"
+          (onClick)="openNewUserDialog()"
+        ></p-button>
+      </div>
+    </div>
+    
+    <!-- Filtros -->
+    <div class="grid mb-4">
+      <div class="col-12 md:col-4">
+        <span class="p-input-icon-left w-full">
+          <i class="pi pi-search"></i>
+          <input 
+            pInputText 
+            [(ngModel)]="searchText" 
+            placeholder="Buscar por nombre o email..." 
+            class="w-full"
+          />
+        </span>
+      </div>
+      
+      <div class="col-12 md:col-3">
+        <p-select
+          [options]="roles"
+          [(ngModel)]="roleFilter"
+          placeholder="Filtrar por rol"
+          [showClear]="true"
+          class="w-full"
+          optionLabel="label"
+          optionValue="value"
+        ></p-select>
+      </div>
+      
+      <div class="col-12 md:col-3">
+        <p-select
+          [options]="[
+            { label: 'Activos', value: 'active' },
+            { label: 'Inactivos', value: 'inactive' }
+          ]"
+          [(ngModel)]="statusFilter"
+          placeholder="Filtrar por estado"
+          [showClear]="true"
+          class="w-full"
+          optionLabel="label"
+          optionValue="value"
+        ></p-select>
+      </div>
+      
+      <div class="col-12 md:col-2">
+        <p-button 
+          label="Limpiar" 
+          icon="pi pi-filter-slash" 
+          severity="secondary" 
+          [outlined]="true"
+          (click)="searchText=''; roleFilter=''; statusFilter=''"
+          class="w-full"
+        ></p-button>
+      </div>
+    </div>
+    
+    <!-- Tabla de usuarios -->
+    <p-card>
+      <p-table 
+        [value]="filteredUsers" 
+        [paginator]="true" 
+        [rows]="10"
+        [rowsPerPageOptions]="[10,25,50]"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} usuarios"
+      >
+        
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Usuario</th>
+            <th>Email</th>
+            <th>Rol</th>
+            <th>Estado</th>
+            <th>Permisos</th>
+            <th style="width: 200px">Acciones</th>
+          </tr>
+        </ng-template>
+        
+        <ng-template pTemplate="body" let-user>
+          <tr>
+            <td>
+              <div class="flex align-items-center gap-2">
+                <p-avatar
+                  [label]="getInitials(user.name)"
+                  shape="circle"
+                  [style]="{
+                    'background-color': user.role === 'superAdmin' ? '#ef4444' : 
+                                      (user.role === 'admin' ? '#f59e0b' : '#3b82f6')
+                  }"
+                ></p-avatar>
+                <span class="font-bold">{{user.name}}</span>
+              </div>
+            </td>
+            <td>{{user.email}}</td>
+            <td>
+              <p-tag 
+                [value]="user.role === 'superAdmin' ? 'Super Admin' : 
+                        (user.role === 'admin' ? 'Administrador' : 'Usuario')"
+                [severity]="getRoleSeverity(user.role)"
+              ></p-tag>
+            </td>
+            <td>
+              <div class="flex align-items-center gap-2">
+                <p-toggleSwitch 
+                  [(ngModel)]="user.active"
+                  (onChange)="toggleActive(user)"
+                  [disabled]="user.role === 'superAdmin' && currentUser?.email !== 'admin@erp.com'"
+                ></p-toggleSwitch>
+                <span [class.text-success]="user.active" [class.text-danger]="!user.active">
+                  {{user.active ? 'Activo' : 'Inactivo'}}
+                </span>
+              </div>
+            </td>
+            <td>
+              <div class="flex gap-1 flex-wrap">
+                <p-tag 
+                  *ngFor="let p of user.permissions.slice(0,3)" 
+                  [value]="getPermissionLabel(p)"
+                  severity="info"
+                  styleClass="mr-1"
+                ></p-tag>
+                <span *ngIf="user.permissions.length > 3" class="text-600 text-sm">
+                  +{{user.permissions.length - 3}} más
+                </span>
+              </div>
+            </td>
+            <td>
+              <div class="flex gap-1">
+                <p-button
+                  icon="pi pi-shield"
+                  severity="info"
+                  [rounded]="true"
+                  [text]="true"
+                  (click)="openPermissions(user)"
+                  pTooltip="Editar permisos"
+                  tooltipPosition="top"
+                  [disabled]="!hasPermission('EDIT_USERS')"
+                ></p-button>
+                
+                <p-button
+                  icon="pi pi-pencil"
+                  severity="success"
+                  [rounded]="true"
+                  [text]="true"
+                  (click)="openEditUserDialog(user)"
+                  pTooltip="Editar usuario"
+                  tooltipPosition="top"
+                  [disabled]="!hasPermission('EDIT_USERS') || 
+                              (user.role === 'superAdmin' && currentUser?.email !== 'admin@erp.com')"
+                ></p-button>
+                
+                <p-button
+                  icon="pi pi-trash"
+                  severity="danger"
+                  [rounded]="true"
+                  [text]="true"
+                  (click)="confirmDeleteUser(user)"
+                  pTooltip="Eliminar usuario"
+                  tooltipPosition="top"
+                  [disabled]="!hasPermission('DELETE_USER') || user.role === 'superAdmin'"
+                ></p-button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+        
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="6" class="text-center p-4">
+              No hay usuarios que coincidan con los filtros
+            </td>
+          </tr>
+        </ng-template>
+        
+      </p-table>
+    </p-card>
+    
+    <!-- Modal de permisos -->
+    <p-dialog
+      [(visible)]="showPermissionsDialog"
+      [style]="{ width: '700px' }"
+      [modal]="true"
+      [draggable]="false"
+      [resizable]="false"
+      header="Editar Permisos"
+      (onHide)="closePermissionsModal()"
+    >
+      
+      <div *ngIf="selectedUser" class="flex flex-column gap-3">
+        
+        <!-- Info del usuario -->
+        <div class="surface-ground p-3 border-round flex align-items-center gap-2">
+          <p-avatar
+            [label]="getInitials(selectedUser.name)"
+            shape="circle"
+            size="large"
+            [style]="{
+              'background-color': selectedUser.role === 'superAdmin' ? '#ef4444' : 
+                                (selectedUser.role === 'admin' ? '#f59e0b' : '#3b82f6')
+            }"
+          ></p-avatar>
+          <div>
+            <h3 class="m-0">{{selectedUser.name}}</h3>
+            <p class="m-0 text-600">{{selectedUser.email}}</p>
+            <p-tag 
+              [value]="selectedUser.role === 'superAdmin' ? 'Super Admin' : 
+                      (selectedUser.role === 'admin' ? 'Administrador' : 'Usuario')"
+              [severity]="getRoleSeverity(selectedUser.role)"
+            ></p-tag>
+          </div>
+        </div>
+        
+        <p-divider></p-divider>
+        
+        <!-- Permisos por categoría -->
+        <div *ngFor="let category of permissionCategories" class="mb-3">
+          <h4 class="mt-0 mb-2">{{category}}</h4>
+          <div class="grid">
+            <div *ngFor="let perm of getPermissionsByCategory(category)" 
+                 class="col-12 md:col-6">
+              <div class="flex align-items-start gap-2 p-2 surface-ground border-round">
+                <p-checkbox
+                  [binary]="true"
+                  [ngModel]="userHasPermission(selectedUser, perm.key)"
+                  (onChange)="togglePermission(perm.key)"
+                  [disabled]="selectedUser.role === 'superAdmin'"
+                  [inputId]="'perm_' + perm.key"
+                ></p-checkbox>
+                <div class="flex flex-column">
+                  <label [for]="'perm_' + perm.key" class="font-bold">{{perm.label}}</label>
+                  <small class="text-600">{{perm.description}}</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Mensaje para superAdmin -->
+        <div *ngIf="selectedUser.role === 'superAdmin'" class="surface-200 p-3 border-round text-center">
+          <i class="pi pi-info-circle text-600 mr-2"></i>
+          <span class="text-600">El Super Admin tiene todos los permisos por defecto</span>
+        </div>
+        
+      </div>
+      
+      <ng-template pTemplate="footer">
+        <p-button 
+          label="Cancelar" 
+          icon="pi pi-times" 
+          (click)="closePermissionsModal()"
+          class="p-button-text"
+        ></p-button>
+        <p-button 
+          label="Guardar Permisos" 
+          icon="pi pi-save" 
+          severity="success"
+          (click)="savePermissions()"
+          [disabled]="selectedUser?.role === 'superAdmin'"
+        ></p-button>
+      </ng-template>
+      
+    </p-dialog>
+    
+    <!-- Modal de usuario (crear/editar) -->
+    <p-dialog
+      [(visible)]="showUserDialog"
+      [style]="{ width: '500px' }"
+      [modal]="true"
+      [draggable]="false"
+      [resizable]="false"
+      [header]="editingUser?.email ? 'Editar Usuario' : 'Nuevo Usuario'"
+      (onHide)="closeUserDialog()"
+    >
+      
+      <div *ngIf="editingUser" class="flex flex-column gap-3">
+        
+        <div class="field">
+          <label for="userName">Nombre <span class="text-danger">*</span></label>
+          <input 
+            id="userName"
+            pInputText 
+            [(ngModel)]="editingUser.name" 
+            class="w-full"
+            placeholder="Nombre completo"
+          />
+        </div>
+        
+        <div class="field">
+          <label for="userEmail">Email <span class="text-danger">*</span></label>
+          <input 
+            id="userEmail"
+            pInputText 
+            [(ngModel)]="editingUser.email" 
+            class="w-full"
+            placeholder="correo@ejemplo.com"
+            [disabled]="editingUser.email === 'admin@erp.com'"
+          />
+        </div>
+        
+        <div class="field">
+          <label for="userRole">Rol</label>
+          <p-select
+            id="userRole"
+            [options]="roles"
+            [(ngModel)]="editingUser.role"
+            class="w-full"
+            optionLabel="label"
+            optionValue="value"
+            [disabled]="editingUser.email === 'admin@erp.com'"
+          ></p-select>
+        </div>
+        
+        <div class="field">
+          <div class="flex align-items-center gap-2">
+            <p-toggleSwitch 
+              [(ngModel)]="editingUser.active"
+              [disabled]="editingUser.email === 'admin@erp.com'"
+            ></p-toggleSwitch>
+            <label>Usuario {{editingUser.active ? 'Activo' : 'Inactivo'}}</label>
+          </div>
+        </div>
+        
+        <!-- Permisos básicos para nuevo usuario -->
+        <div *ngIf="!editingUser.email" class="surface-ground p-3 border-round">
+          <label class="font-bold">Permisos iniciales</label>
+          <p class="text-sm text-600 mt-1 mb-2">
+            El usuario tendrá permisos básicos por defecto. Luego podrás personalizarlos.
+          </p>
+          <div class="flex gap-2 flex-wrap">
+            <p-tag value="Ver Tickets" severity="info"></p-tag>
+          </div>
+        </div>
+        
+      </div>
+      
+      <ng-template pTemplate="footer">
+        <p-button 
+          label="Cancelar" 
+          icon="pi pi-times" 
+          (click)="closeUserDialog()"
+          class="p-button-text"
+        ></p-button>
+        <p-button 
+          [label]="editingUser?.email ? 'Actualizar' : 'Crear'"
+          [icon]="editingUser?.email ? 'pi pi-save' : 'pi pi-user-plus'"
+          severity="success"
+          (click)="saveUser()"
+        ></p-button>
+      </ng-template>
+      
+    </p-dialog>
+    
+  </div>
+  
 </div>

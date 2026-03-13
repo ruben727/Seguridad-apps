@@ -42,6 +42,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/user/users-admin/users-admin').then(m => m.UsersAdmin) 
   },
  
+     { 
+    path: 'user/kanban', 
+    loadComponent: () => import('./pages/user/kanban/kanban').then(m => m.Kanban) 
+  },
 
   { 
     path: 'user/tickets', 

@@ -20,18 +20,6 @@ routerLink="/user/index">
 
 <p-divider></p-divider>
 
-<!-- CREAR TICKET -->
-
-<button
-*ngIf="perm.hasPermission('CREATE_TICKET')"
-pButton
-label="Crear Ticket"
-icon="pi pi-plus"
-class="p-button-text"
-routerLink="/user/tickets/create">
-</button>
-
-<p-divider *ngIf="perm.hasPermission('CREATE_TICKET')"></p-divider>
 
 <!-- VER TICKETS -->
 

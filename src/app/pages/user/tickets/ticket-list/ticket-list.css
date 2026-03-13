@@ -1,0 +1,151 @@
+.layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--surface-ground);
+}
+
+.sidebar {
+  width: 250px;
+  flex-shrink: 0;
+  background-color: var(--surface-card);
+  box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+  z-index: 1;
+}
+
+.content {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+/* Kanban */
+.kanban-board {
+  min-height: 70vh;
+}
+
+.column {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--surface-card);
+}
+
+.column-header {
+  border-bottom: 2px solid var(--surface-border);
+}
+
+.column-content {
+  flex: 1;
+  min-height: 500px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.ticket-card {
+  cursor: move;
+  transition: all 0.2s ease;
+  border-left: 4px solid transparent;
+}
+
+.ticket-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+}
+
+.ticket-card.can-drag {
+  border-left-color: var(--primary-color);
+}
+
+/* Prioridades en kanban */
+.ticket-card[data-priority="Alta"] {
+  border-left-color: #ef4444;
+}
+
+.ticket-card[data-priority="Media"] {
+  border-left-color: #f59e0b;
+}
+
+.ticket-card[data-priority="Baja"] {
+  border-left-color: #10b981;
+}
+
+/* Tabla */
+.table-view {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.p-datatable .p-datatable-tbody > tr {
+  cursor: pointer;
+}
+
+.p-datatable .p-datatable-tbody > tr:hover {
+  background-color: var(--surface-hover);
+}
+
+/* Drag & Drop */
+.cursor-move {
+  cursor: move;
+}
+
+/* Diálogo */
+.p-dialog-content {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .layout {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    width: 100%;
+  }
+  
+  .column-content {
+    max-height: 300px;
+  }
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.content > * {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Tags pequeños */
+.p-tag.p-tag-sm {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.4rem;
+}
+
+/* Scroll personalizado */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--surface-100);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--surface-400);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--surface-500);
+}

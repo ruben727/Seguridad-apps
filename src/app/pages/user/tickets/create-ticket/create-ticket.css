@@ -1,0 +1,72 @@
+.layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--surface-ground);
+}
+
+.sidebar {
+  width: 250px;
+  flex-shrink: 0;
+  background-color: var(--surface-card);
+  box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+  z-index: 1;
+}
+
+.content {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+/* Estilos para campos obligatorios */
+.text-danger {
+  color: #ef4444;
+}
+
+/* Estilos para validación */
+.ng-invalid.ng-dirty {
+  border-color: #ef4444 !important;
+}
+
+.ng-invalid.ng-dirty:focus {
+  box-shadow: 0 0 0 0.2rem rgba(239, 68, 68, 0.25) !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .layout {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    width: 100%;
+  }
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.content > * {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Estilos para radio buttons */
+.field-radiobutton {
+  display: flex;
+  align-items: center;
+  margin-right: 1rem;
+}
+
+.field-radiobutton label {
+  margin-left: 0.5rem;
+  cursor: pointer;
+}

@@ -1,43 +1,620 @@
-<div style="display:flex; height:100vh;">
-<div style="width:250px;">
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<div class="layout">
+  
+  <div class="sidebar">
     <app-sidebar></app-sidebar>
   </div>
-
-<p-table
-[value]="tickets"
-paginator
-[rows]="10">
-
-<ng-template pTemplate="header">
-
-<tr>
-
-<th>ID</th>
-<th>Titulo</th>
-<th>Estado</th>
-<th>Asignado</th>
-<th>Prioridad</th>
-<th>Fecha limite</th>
-
-</tr>
-
-</ng-template>
-
-<ng-template pTemplate="body" let-ticket>
-
-<tr>
-
-<td>{{ticket.id}}</td>
-<td>{{ticket.title}}</td>
-<td>{{ticket.status}}</td>
-<td>{{ticket.assignedTo}}</td>
-<td>{{ticket.priority}}</td>
-<td>{{ticket.dueDate}}</td>
-
-</tr>
-
-</ng-template>
-
-</p-table>
-
+  
+  <div class="content p-4">
+    
+    <!-- Header -->
+    <div class="flex justify-content-between align-items-center mb-4">
+      <div class="flex align-items-center gap-2">
+        <i class="pi pi-ticket text-primary" style="font-size: 2rem"></i>
+        <div>
+          <h1 class="m-0 text-2xl font-bold">Gestión de Tickets</h1>
+          <small class="text-600">{{allTickets.length}} tickets en total</small>
+        </div>
+      </div>
+      
+      <div class="flex gap-2">
+        <!-- Selector de vista -->
+        <p-selectButton
+          [options]="viewOptions"
+          [(ngModel)]="viewMode"
+          optionLabel="label"
+          optionValue="value"
+        >
+          <ng-template pTemplate="item" let-item>
+            <div class="flex align-items-center gap-2">
+              <i [class]="item.icon"></i>
+              <span>{{item.label}}</span>
+            </div>
+          </ng-template>
+        </p-selectButton>
+        
+        <!-- Botón crear ticket -->
+        <p-button
+          *ngIf="hasPermission('CREATE_TICKET')"
+          label="Nuevo Ticket"
+          icon="pi pi-plus"
+          severity="success"
+          routerLink="/user/tickets/create"
+        ></p-button>
+      </div>
+    </div>
+    
+    <!-- VISTA KANBAN -->
+    <div *ngIf="viewMode === 'kanban'" class="kanban-board">
+      <div class="grid">
+        
+        <!-- Columna Pendiente -->
+        <div class="col-12 md:col-3">
+          <div class="column surface-card border-round shadow-1"
+               (drop)="drop('Pendiente')"
+               (dragover)="allowDrop($event)">
+            
+            <div class="column-header p-3 surface-200 border-round-top">
+              <div class="flex align-items-center justify-content-between">
+                <div class="flex align-items-center gap-2">
+                  <i class="pi pi-clock text-600"></i>
+                  <h3 class="m-0">Pendiente</h3>
+                </div>
+                <span class="bg-danger text-white border-circle w-2rem h-2rem flex align-items-center justify-content-center">
+                  {{pendientes.length}}
+                </span>
+              </div>
+            </div>
+            
+            <div class="column-content p-2">
+              <div *ngFor="let ticket of pendientes" 
+                   class="ticket-card surface-card p-3 border-round shadow-1 mb-2"
+                   [class.can-drag]="canChangeStatus(ticket)"
+                   draggable="{{canChangeStatus(ticket)}}"
+                   (dragstart)="drag(ticket)"
+                   (click)="viewTicket(ticket)">
+                
+                <div class="flex justify-content-between align-items-start">
+                  <h4 class="m-0 text-md">{{ticket.title}}</h4>
+                  <p-tag [value]="ticket.priority" [severity]="getPrioritySeverity(ticket.priority)"></p-tag>
+                </div>
+                
+                <p class="text-sm text-600 mt-2 mb-2">{{ticket.description | slice:0:60}}...</p>
+                
+                <div class="flex align-items-center justify-content-between mt-2">
+                  <div class="flex align-items-center gap-2">
+                    <p-avatar
+                      [label]="getInitials(ticket.assignedTo?.name)"
+                      shape="circle"
+                      pTooltip="{{ticket.assignedTo?.name || 'Sin asignar'}}"
+                      tooltipPosition="top"
+                    ></p-avatar>
+                    <small class="text-600">#{{ticket.ticketNumber}}</small>
+                  </div>
+                  <small class="text-600">{{formatDate(ticket.dueDate)}}</small>
+                </div>
+                
+                <div class="flex justify-content-end gap-1 mt-2">
+                  <p-button
+                    *ngIf="canEditTicket(ticket)"
+                    icon="pi pi-pencil"
+                    severity="info"
+                    [rounded]="true"
+                    [text]="true"
+                    (click)="viewTicket(ticket); $event.stopPropagation()"
+                    pTooltip="Editar"
+                    tooltipPosition="top"
+                  ></p-button>
+                  
+                  <p-button
+                    *ngIf="hasPermission('DELETE_TICKET')"
+                    icon="pi pi-trash"
+                    severity="danger"
+                    [rounded]="true"
+                    [text]="true"
+                    (click)="confirmDelete(ticket); $event.stopPropagation()"
+                    pTooltip="Eliminar"
+                    tooltipPosition="top"
+                  ></p-button>
+                </div>
+                
+              </div>
+              
+              <div *ngIf="pendientes.length === 0" class="text-center p-3 text-600">
+                <i class="pi pi-inbox text-400" style="font-size: 2rem"></i>
+                <p>No hay tickets</p>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+        
+        <!-- Columna En progreso -->
+        <div class="col-12 md:col-3">
+          <div class="column surface-card border-round shadow-1"
+               (drop)="drop('En progreso')"
+               (dragover)="allowDrop($event)">
+            
+            <div class="column-header p-3 surface-200 border-round-top">
+              <div class="flex align-items-center justify-content-between">
+                <div class="flex align-items-center gap-2">
+                  <i class="pi pi-spinner text-600"></i>
+                  <h3 class="m-0">En progreso</h3>
+                </div>
+                <span class="bg-warning text-white border-circle w-2rem h-2rem flex align-items-center justify-content-center">
+                  {{enProgreso.length}}
+                </span>
+              </div>
+            </div>
+            
+            <div class="column-content p-2">
+              <div *ngFor="let ticket of enProgreso" 
+                   class="ticket-card surface-card p-3 border-round shadow-1 mb-2"
+                   [class.can-drag]="canChangeStatus(ticket)"
+                   draggable="{{canChangeStatus(ticket)}}"
+                   (dragstart)="drag(ticket)"
+                   (click)="viewTicket(ticket)">
+                
+                <div class="flex justify-content-between align-items-start">
+                  <h4 class="m-0 text-md">{{ticket.title}}</h4>
+                  <p-tag [value]="ticket.priority" [severity]="getPrioritySeverity(ticket.priority)"></p-tag>
+                </div>
+                
+                <p class="text-sm text-600 mt-2 mb-2">{{ticket.description | slice:0:60}}...</p>
+                
+                <div class="flex align-items-center justify-content-between mt-2">
+                  <div class="flex align-items-center gap-2">
+                    <p-avatar
+                      [label]="getInitials(ticket.assignedTo?.name)"
+                      shape="circle"
+                      pTooltip="{{ticket.assignedTo?.name || 'Sin asignar'}}"
+                      tooltipPosition="top"
+                    ></p-avatar>
+                    <small class="text-600">#{{ticket.ticketNumber}}</small>
+                  </div>
+                  <small class="text-600">{{formatDate(ticket.dueDate)}}</small>
+                </div>
+                
+              </div>
+              
+              <div *ngIf="enProgreso.length === 0" class="text-center p-3 text-600">
+                <i class="pi pi-inbox text-400" style="font-size: 2rem"></i>
+                <p>No hay tickets</p>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+        
+        <!-- Columna Revisión -->
+        <div class="col-12 md:col-3">
+          <div class="column surface-card border-round shadow-1"
+               (drop)="drop('Revisión')"
+               (dragover)="allowDrop($event)">
+            
+            <div class="column-header p-3 surface-200 border-round-top">
+              <div class="flex align-items-center justify-content-between">
+                <div class="flex align-items-center gap-2">
+                  <i class="pi pi-search text-600"></i>
+                  <h3 class="m-0">Revisión</h3>
+                </div>
+                <span class="bg-info text-white border-circle w-2rem h-2rem flex align-items-center justify-content-center">
+                  {{revision.length}}
+                </span>
+              </div>
+            </div>
+            
+            <div class="column-content p-2">
+              <div *ngFor="let ticket of revision" 
+                   class="ticket-card surface-card p-3 border-round shadow-1 mb-2"
+                   [class.can-drag]="canChangeStatus(ticket)"
+                   draggable="{{canChangeStatus(ticket)}}"
+                   (dragstart)="drag(ticket)"
+                   (click)="viewTicket(ticket)">
+                
+                <div class="flex justify-content-between align-items-start">
+                  <h4 class="m-0 text-md">{{ticket.title}}</h4>
+                  <p-tag [value]="ticket.priority" [severity]="getPrioritySeverity(ticket.priority)"></p-tag>
+                </div>
+                
+                <p class="text-sm text-600 mt-2 mb-2">{{ticket.description | slice:0:60}}...</p>
+                
+                <div class="flex align-items-center justify-content-between mt-2">
+                  <div class="flex align-items-center gap-2">
+                    <p-avatar
+                      [label]="getInitials(ticket.assignedTo?.name)"
+                      shape="circle"
+                      pTooltip="{{ticket.assignedTo?.name || 'Sin asignar'}}"
+                      tooltipPosition="top"
+                    ></p-avatar>
+                    <small class="text-600">#{{ticket.ticketNumber}}</small>
+                  </div>
+                  <small class="text-600">{{formatDate(ticket.dueDate)}}</small>
+                </div>
+                
+              </div>
+              
+              <div *ngIf="revision.length === 0" class="text-center p-3 text-600">
+                <i class="pi pi-inbox text-400" style="font-size: 2rem"></i>
+                <p>No hay tickets</p>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+        
+        <!-- Columna Hecho -->
+        <div class="col-12 md:col-3">
+          <div class="column surface-card border-round shadow-1"
+               (drop)="drop('Hecho')"
+               (dragover)="allowDrop($event)">
+            
+            <div class="column-header p-3 surface-200 border-round-top">
+              <div class="flex align-items-center justify-content-between">
+                <div class="flex align-items-center gap-2">
+                  <i class="pi pi-check-circle text-600"></i>
+                  <h3 class="m-0">Hecho</h3>
+                </div>
+                <span class="bg-success text-white border-circle w-2rem h-2rem flex align-items-center justify-content-center">
+                  {{hecho.length}}
+                </span>
+              </div>
+            </div>
+            
+            <div class="column-content p-2">
+              <div *ngFor="let ticket of hecho" 
+                   class="ticket-card surface-card p-3 border-round shadow-1 mb-2"
+                   [class.can-drag]="canChangeStatus(ticket)"
+                   draggable="{{canChangeStatus(ticket)}}"
+                   (dragstart)="drag(ticket)"
+                   (click)="viewTicket(ticket)">
+                
+                <div class="flex justify-content-between align-items-start">
+                  <h4 class="m-0 text-md">{{ticket.title}}</h4>
+                  <p-tag [value]="ticket.priority" [severity]="getPrioritySeverity(ticket.priority)"></p-tag>
+                </div>
+                
+                <p class="text-sm text-600 mt-2 mb-2">{{ticket.description | slice:0:60}}...</p>
+                
+                <div class="flex align-items-center justify-content-between mt-2">
+                  <div class="flex align-items-center gap-2">
+                    <p-avatar
+                      [label]="getInitials(ticket.assignedTo?.name)"
+                      shape="circle"
+                      pTooltip="{{ticket.assignedTo?.name || 'Sin asignar'}}"
+                      tooltipPosition="top"
+                    ></p-avatar>
+                    <small class="text-600">#{{ticket.ticketNumber}}</small>
+                  </div>
+                  <small class="text-600">{{formatDate(ticket.dueDate)}}</small>
+                </div>
+                
+              </div>
+              
+              <div *ngIf="hecho.length === 0" class="text-center p-3 text-600">
+                <i class="pi pi-inbox text-400" style="font-size: 2rem"></i>
+                <p>No hay tickets</p>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+        
+      </div>
+    </div>
+    
+    <!-- VISTA TABLA -->
+    <div *ngIf="viewMode === 'table'" class="table-view">
+      
+      <!-- Filtros -->
+      <div class="grid mb-3">
+        <div class="col-12 md:col-4">
+          <span class="p-input-icon-left w-full">
+            <i class="pi pi-search"></i>
+            <input pInputText 
+                   [(ngModel)]="globalFilter" 
+                   placeholder="Buscar tickets..." 
+                   class="w-full"/>
+          </span>
+        </div>
+        
+        <div class="col-12 md:col-3">
+          <p-select 
+            [options]="statuses" 
+            [(ngModel)]="statusFilter" 
+            placeholder="Filtrar por estado"
+            [showClear]="true"
+            class="w-full">
+          </p-select>
+        </div>
+        
+        <div class="col-12 md:col-3">
+          <p-select 
+            [options]="priorities" 
+            [(ngModel)]="priorityFilter" 
+            placeholder="Filtrar por prioridad"
+            [showClear]="true"
+            class="w-full">
+          </p-select>
+        </div>
+        
+        <div class="col-12 md:col-2">
+          <p-button 
+            label="Limpiar" 
+            icon="pi pi-filter-slash" 
+            severity="secondary" 
+            [outlined]="true"
+            (click)="globalFilter=''; statusFilter=''; priorityFilter=''"
+            class="w-full">
+          </p-button>
+        </div>
+      </div>
+      
+      <!-- Tabla -->
+      <p-card>
+        <p-table 
+          [value]="allTickets" 
+          [paginator]="true" 
+          [rows]="10"
+          [globalFilterFields]="['title', 'description', 'ticketNumber', 'assignedTo.name']"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} tickets"
+          [rowsPerPageOptions]="[10,25,50]"
+        >
+          
+          <ng-template pTemplate="header">
+            <tr>
+              <th>ID</th>
+              <th>Título</th>
+              <th>Estado</th>
+              <th>Prioridad</th>
+              <th>Asignado a</th>
+              <th>Fecha límite</th>
+              <th style="width: 100px">Acciones</th>
+            </tr>
+          </ng-template>
+          
+          <ng-template pTemplate="body" let-ticket>
+            <tr class="cursor-pointer" (click)="viewTicket(ticket)">
+              <td>#{{ticket.ticketNumber}}</td>
+              <td>{{ticket.title}}</td>
+              <td>
+                <p-tag 
+                  [value]="ticket.status" 
+                  [severity]="getStatusSeverity(ticket.status)">
+                </p-tag>
+              </td>
+              <td>
+                <p-tag 
+                  [value]="ticket.priority" 
+                  [severity]="getPrioritySeverity(ticket.priority)">
+                </p-tag>
+              </td>
+              <td>
+                <div class="flex align-items-center gap-2">
+                  <p-avatar
+                    [label]="getInitials(ticket.assignedTo?.name)"
+                    shape="circle"
+                  ></p-avatar>
+                  <span>{{ticket.assignedTo?.name || 'Sin asignar'}}</span>
+                </div>
+              </td>
+              <td>{{formatDate(ticket.dueDate)}}</td>
+              <td>
+                <div class="flex gap-1">
+                  <p-button
+                    icon="pi pi-eye"
+                    severity="info"
+                    [rounded]="true"
+                    [text]="true"
+                    (click)="viewTicket(ticket); $event.stopPropagation()"
+                    pTooltip="Ver detalle"
+                    tooltipPosition="top"
+                  ></p-button>
+                  
+                  <p-button
+                    *ngIf="canEditTicket(ticket)"
+                    icon="pi pi-pencil"
+                    severity="success"
+                    [rounded]="true"
+                    [text]="true"
+                    (click)="viewTicket(ticket); $event.stopPropagation()"
+                    pTooltip="Editar"
+                    tooltipPosition="top"
+                  ></p-button>
+                  
+                  <p-button
+                    *ngIf="hasPermission('DELETE_TICKET')"
+                    icon="pi pi-trash"
+                    severity="danger"
+                    [rounded]="true"
+                    [text]="true"
+                    (click)="confirmDelete(ticket); $event.stopPropagation()"
+                    pTooltip="Eliminar"
+                    tooltipPosition="top"
+                  ></p-button>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+          
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="7" class="text-center p-4">
+                No hay tickets disponibles
+              </td>
+            </tr>
+          </ng-template>
+          
+        </p-table>
+      </p-card>
+      
+    </div>
+    
+    <!-- Diálogo de detalle de ticket -->
+    <p-dialog 
+      [(visible)]="showDetailDialog" 
+      [style]="{ width: '700px' }"
+      [modal]="true"
+      [draggable]="false"
+      [resizable]="false"
+      header="Detalle del Ticket"
+      (onHide)="closeDetail()"
+    >
+      
+      <div *ngIf="selectedTicket" class="flex flex-column gap-3">
+        
+        <!-- Título y prioridad -->
+        <div class="flex justify-content-between align-items-center">
+          <h2 class="m-0">{{selectedTicket.title}}</h2>
+          <p-tag 
+            [value]="selectedTicket.priority" 
+            [severity]="getPrioritySeverity(selectedTicket.priority)">
+          </p-tag>
+        </div>
+        
+        <p-divider></p-divider>
+        
+        <!-- Información general -->
+        <div class="grid">
+          <div class="col-6">
+            <label class="text-600">Estado</label>
+            <p-select 
+              *ngIf="canChangeStatus(selectedTicket)"
+              [options]="statuses" 
+              [(ngModel)]="selectedTicket.status"
+              [style]="{'width':'100%'}"
+              (onChange)="saveTicketFromDetail()">
+            </p-select>
+            <p-tag 
+              *ngIf="!canChangeStatus(selectedTicket)"
+              [value]="selectedTicket.status" 
+              [severity]="getStatusSeverity(selectedTicket.status)">
+            </p-tag>
+          </div>
+          
+          <div class="col-6">
+            <label class="text-600">Asignado a</label>
+            <div class="flex align-items-center gap-2 mt-2">
+              <p-avatar
+                [label]="getInitials(selectedTicket.assignedTo?.name)"
+                shape="circle"
+              ></p-avatar>
+              <span>{{selectedTicket.assignedTo?.name || 'Sin asignar'}}</span>
+            </div>
+          </div>
+          
+          <div class="col-6 mt-3">
+            <label class="text-600">Creado por</label>
+            <div class="flex align-items-center gap-2 mt-2">
+              <p-avatar
+                [label]="getInitials(selectedTicket.createdBy?.name)"
+                shape="circle"
+              ></p-avatar>
+              <span>{{selectedTicket.createdBy?.name}}</span>
+            </div>
+          </div>
+          
+          <div class="col-6 mt-3">
+            <label class="text-600">Fechas</label>
+            <div class="flex flex-column gap-1 mt-2">
+              <small>Creado: {{formatDate(selectedTicket.createdAt)}}</small>
+              <small>Límite: {{formatDate(selectedTicket.dueDate)}}</small>
+            </div>
+          </div>
+        </div>
+        
+        <p-divider></p-divider>
+        
+        <!-- Descripción -->
+        <div>
+          <h4 class="mt-0 mb-2">Descripción</h4>
+          <p>{{selectedTicket.description}}</p>
+        </div>
+        
+        <p-divider></p-divider>
+        
+        <!-- Comentarios -->
+        <div>
+          <h4 class="mt-0 mb-2">Comentarios</h4>
+          
+          <div *ngIf="canComment(selectedTicket)" class="flex gap-2 mb-3">
+            <input 
+              pInputText 
+              #commentInput
+              placeholder="Escribe un comentario..." 
+              class="w-full"
+              (keyup.enter)="addComment(selectedTicket, commentInput.value); commentInput.value=''"
+            />
+            <p-button 
+              icon="pi pi-send" 
+              severity="info"
+              (click)="addComment(selectedTicket, commentInput.value); commentInput.value=''"
+            ></p-button>
+          </div>
+          
+          <div *ngFor="let comment of selectedTicket.comments" class="surface-ground p-3 border-round mb-2">
+            <div class="flex align-items-center gap-2">
+              <p-avatar
+                [label]="getInitials(comment.user?.name)"
+                shape="circle"
+              ></p-avatar>
+              <span class="font-bold">{{comment.user?.name}}</span>
+              <small class="text-600">{{formatDate(comment.createdAt)}}</small>
+            </div>
+            <p class="m-0 mt-2">{{comment.text}}</p>
+          </div>
+          
+          <div *ngIf="!selectedTicket.comments?.length" class="text-center p-3 text-600">
+            No hay comentarios
+          </div>
+        </div>
+        
+        <p-divider></p-divider>
+        
+        <!-- Historial -->
+        <div>
+          <h4 class="mt-0 mb-2">Historial de cambios</h4>
+          
+          <div *ngFor="let entry of selectedTicket.history" class="surface-ground p-2 border-round mb-2 text-sm">
+            <div class="flex align-items-center gap-2">
+              <p-avatar
+                [label]="getInitials(entry.user?.name)"
+                shape="circle"
+              ></p-avatar>
+              <span class="font-bold">{{entry.user?.name}}</span>
+              <small class="text-600">{{formatDate(entry.timestamp)}}</small>
+            </div>
+            <p class="m-0 mt-1">{{entry.action}}: {{entry.field}} cambió de "{{entry.oldValue}}" a "{{entry.newValue}}"</p>
+          </div>
+          
+          <div *ngIf="!selectedTicket.history?.length" class="text-center p-3 text-600">
+            Sin historial
+          </div>
+        </div>
+        
+      </div>
+      
+      <ng-template pTemplate="footer">
+        <p-button 
+          label="Cerrar" 
+          icon="pi pi-times" 
+          (click)="closeDetail()"
+          class="p-button-text"
+        ></p-button>
+        <p-button 
+          *ngIf="canEditTicket(selectedTicket!)"
+          label="Guardar cambios" 
+          icon="pi pi-save" 
+          severity="success"
+          (click)="saveTicketFromDetail()"
+        ></p-button>
+      </ng-template>
+      
+    </p-dialog>
+    
+  </div>
+  
 </div>

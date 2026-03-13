@@ -1,37 +1,217 @@
-<div style="display:flex; height:100vh;">
-<div style="width:250px;">
+<p-toast></p-toast>
+
+<div class="layout">
+  
+  <div class="sidebar">
     <app-sidebar></app-sidebar>
   </div>
-
-<p-card header="Crear Ticket">
+  
+  <div class="content p-4">
     
+    <!-- Header -->
+    <div class="flex justify-content-between align-items-center mb-4">
+      <div class="flex align-items-center gap-2">
+        <i class="pi pi-plus-circle text-primary" style="font-size: 2rem"></i>
+        <div>
+          <h1 class="m-0 text-2xl font-bold">Crear Nuevo Ticket</h1>
+          <small class="text-600">Completa la información para crear un ticket</small>
+        </div>
+      </div>
+      
+      <p-button
+        label="Volver"
+        icon="pi pi-arrow-left"
+        severity="secondary"
+        [outlined]="true"
+        routerLink="/user/tickets"
+      ></p-button>
+    </div>
+    
+    <!-- Formulario -->
+    <div class="grid">
+      <div class="col-12 md:col-8 offset-md-2">
+        <p-card>
+          <div class="flex flex-column gap-4">
+            
+            <!-- Mensaje de error general -->
+            <p-message
+              *ngIf="submitted && !isValid()"
+              severity="error"
+              text="Completa todos los campos obligatorios"
+            ></p-message>
+            
+            <!-- Título -->
+            <div class="field">
+              <label for="title" class="font-bold">
+                Título <span class="text-danger">*</span>
+              </label>
+              <input
+             id="title"
+             pInputText
+             [(ngModel)]="title"
+                class="w-full"
+             placeholder="Ej: Error en el sistema de facturación"
+           [ngClass]="{'ng-invalid ng-dirty': submitted && !title.trim()}"
+                />
+            <small *ngIf="submitted && !title.trim()" class="text-danger">
+       El título es obligatorio
+              </small>
+            </div>
+            
 
-<div class="flex flex-column gap-3">
 
-<input
-pInputText
-placeholder="Titulo"
-[(ngModel)]="title">
 
+
+            
+            <!-- Descripción -->
+            <div class="field">
+              <label for="description" class="font-bold">
+                Descripción <span class="text-danger">*</span>
+              </label>
+<!-- Línea 73: cambiar !description?.trim() por !description.trim() -->
 <textarea
-rows="5"
-class="p-inputtext p-component w-full"
-[(ngModel)]="description"
-placeholder="Descripción">
-</textarea>
-
-<p-select
-[options]="priorities"
-[(ngModel)]="priority"
-placeholder="Prioridad">
-</p-select>
-
-<p-button
-label="Crear"
-(click)="create()">
-</p-button>
-
-</div>
-
-</p-card>
+  id="description"
+  pInputTextarea
+  [(ngModel)]="description"
+  rows="5"
+  class="w-full"
+  placeholder="Describe el problema o solicitud en detalle..."
+  [ngClass]="{'ng-invalid ng-dirty': submitted && !description.trim()}"
+  autoResize
+></textarea>
+<small *ngIf="submitted && !description.trim()" class="text-danger">
+  La descripción es obligatoria
+</small>
+            </div>
+            
+            <p-divider></p-divider>
+            
+            <!-- Prioridad -->
+            <div class="field">
+              <label class="font-bold">Prioridad <span class="text-danger">*</span></label>
+              <div class="flex flex-wrap gap-3">
+                <div *ngFor="let p of priorities" class="field-radiobutton">
+                  <p-radioButton
+                    [inputId]="'priority_' + p.value"
+                    [value]="p.value"
+                    [(ngModel)]="priority"
+                  ></p-radioButton>
+                  <label [for]="'priority_' + p.value" class="ml-1">
+                    <p-tag [value]="p.label" [severity]="p.severity"></p-tag>
+                  </label>
+                </div>
+              </div>
+            </div>
+            
+            <p-divider></p-divider>
+            
+            <!-- Selección de Grupo -->
+            <div class="field">
+              <label for="group" class="font-bold">Asignar a Grupo</label>
+              <p-select
+                id="group"
+                [options]="groups"
+                [(ngModel)]="selectedGroup"
+                optionLabel="name"
+                placeholder="Seleccionar grupo"
+                class="w-full"
+                [showClear]="true"
+                (onChange)="onGroupChange()"
+              >
+                <ng-template pTemplate="selectedItem">
+                  <div *ngIf="selectedGroup" class="flex align-items-center gap-2">
+                    <i class="pi pi-users"></i>
+                    <span>{{selectedGroup.name}}</span>
+                  </div>
+                </ng-template>
+                <ng-template pTemplate="item" let-group>
+                  <div class="flex align-items-center gap-2">
+                    <i class="pi pi-users"></i>
+                    <span>{{group.name}}</span>
+                    <span class="text-sm text-600 ml-2">({{group.members?.length || 0}} miembros)</span>
+                  </div>
+                </ng-template>
+              </p-select>
+              <small class="text-600">Opcional - Selecciona un grupo para filtrar usuarios</small>
+            </div>
+            
+            <!-- Selección de Usuario -->
+            <div class="field">
+              <label for="user" class="font-bold">Asignar a Usuario</label>
+              <p-select
+                id="user"
+                [options]="availableUsers"
+                [(ngModel)]="assignedUser"
+                optionLabel="name"
+                placeholder="Seleccionar usuario"
+                class="w-full"
+                [showClear]="true"
+              >
+                <ng-template pTemplate="selectedItem">
+                  <div *ngIf="assignedUser" class="flex align-items-center gap-2">
+                    <i class="pi pi-user"></i>
+                    <span>{{assignedUser.name}}</span>
+                    <span class="text-sm text-600">({{assignedUser.email}})</span>
+                  </div>
+                </ng-template>
+                <ng-template pTemplate="item" let-user>
+                  <div class="flex align-items-center gap-2">
+                    <i class="pi pi-user"></i>
+                    <span>{{user.name}}</span>
+                    <span class="text-sm text-600 ml-2">({{user.email}})</span>
+                    <p-tag
+                      *ngIf="user.email === currentUser?.email"
+                      value="Tú"
+                      severity="info"
+                      styleClass="ml-auto"
+                    ></p-tag>
+                  </div>
+                </ng-template>
+              </p-select>
+              <small class="text-600">Opcional - Si no se asigna, quedará sin asignar</small>
+            </div>
+            
+            <p-divider></p-divider>
+            
+            <!-- Estado (solo informativo) -->
+            <div class="field">
+              <label class="font-bold">Estado inicial</label>
+              <div class="flex align-items-center gap-2">
+                <i class="pi pi-clock text-600"></i>
+                <span>Pendiente</span>
+                <p-tag value="Pendiente" severity="info"></p-tag>
+              </div>
+              <small class="text-600">Los tickets se crean con estado "Pendiente" por defecto</small>
+            </div>
+            
+            <p-divider></p-divider>
+            
+            <!-- Botones de acción -->
+            <div class="flex justify-content-end gap-2">
+              <p-button
+                label="Cancelar"
+                icon="pi pi-times"
+                severity="secondary"
+                [outlined]="true"
+                routerLink="/user/tickets"
+              ></p-button>
+              
+              <p-button
+                label="Crear Ticket"
+                icon="pi pi-check"
+                severity="success"
+                (onClick)="create()"
+                [disabled]="!hasPermission('CREATE_TICKET')"
+                pTooltip="Crear nuevo ticket"
+                tooltipPosition="top"
+              ></p-button>
+            </div>
+            
+          </div>
+        </p-card>
+      </div>
+    </div>
+    
+  </div>
+  
 </div>

@@ -40,72 +40,61 @@ export class Login {
     private messageService: MessageService
   ) {}
 
-  iniciarSesion() {
+  iniciarSesion(){
 
-    if (!this.email || !this.password) {
-      this.errorMsg = 'Debes completar todos los campos.';
+    if(!this.email || !this.password){
+      this.errorMsg='Completa todos los campos';
       return;
     }
 
-    // OBTENER USUARIOS
-    let users = JSON.parse(localStorage.getItem('usersERP') || '[]');
+    // ADMIN FIJO
+    const admin = {
+      name:'Administrador',
+      email:'admin@erp.com',
+      password:'Admin@123',
+      role:'superAdmin',
+      permissions:[
+        'VIEW_TICKET',
+        'CREATE_TICKET',
+        'EDIT_TICKET',
+        'DELETE_TICKET',
+        'VIEW_USERS',
+        'EDIT_USERS'
+      ]
+    };
 
-    // SI NO EXISTEN USUARIOS LOS CREA
-    if (users.length === 0) {
+    // USUARIOS REGISTRADOS
+    const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
 
-      users = [
+    let usuarioLogueado = null;
 
-        {
-          name: 'superAdmin',
-          email: 'admin@erp.com',
-          password: 'Admin@123',
-          role: 'superAdmin',
-          permissions: [
-            'VIEW_TICKET',
-            'CREATE_TICKET',
-            'EDIT_TICKET',
-            'DELETE_TICKET',
-            'VIEW_USERS',
-            'EDIT_USERS'
-          ]
-        },
+    if(this.email === admin.email && this.password === admin.password){
+      usuarioLogueado = admin;
+    }else{
 
-        {
-          name: 'user1',
-          email: 'user@erp.com',
-          password: 'User@123',
-          role: 'user',
-          permissions: ['VIEW_TICKET']
-        }
+      usuarioLogueado = usuarios.find((u:any)=>
+        u.email === this.email &&
+        u.password === this.password
+      );
 
-      ];
-
-      localStorage.setItem('usersERP', JSON.stringify(users));
     }
 
-    const usuario = users.find((u: any) =>
-      u.email === this.email &&
-      u.password === this.password
-    );
+    if(usuarioLogueado){
 
-    if (usuario) {
-
-      localStorage.setItem('usuarioERP', JSON.stringify(usuario));
+      localStorage.setItem('usuarioERP',JSON.stringify(usuarioLogueado));
 
       this.messageService.add({
-        severity: 'success',
-        summary: 'Bienvenido',
-        detail: usuario.name
+        severity:'success',
+        summary:'Bienvenido',
+        detail:usuarioLogueado.name
       });
 
-      setTimeout(() => {
+      setTimeout(()=>{
         this.router.navigate(['/user/index']);
-      }, 1000);
+      },1000);
 
-    } else {
-
-      this.errorMsg = 'Correo o contraseña incorrectos';
-
+    }else{
+      this.errorMsg='Correo o contraseña incorrectos';
     }
 
   }

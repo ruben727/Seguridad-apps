@@ -1,81 +1,367 @@
-<div style="display:flex; height:100vh;">
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
 
-  <!-- SIDEBAR -->
-  <div style="width:250px;">
+<div class="layout">
+  
+  <div class="sidebar">
     <app-sidebar></app-sidebar>
   </div>
-
-  <!-- CONTENIDO -->
-  <div style="flex:1; padding:20px; overflow:auto;">
-
-    <!-- CARDS -->
-    <div class="grid">
-
-      <div class="col-12 md:col-3">
-        <p-card header="Total">
-          <h2>{{total}}</h2>
-        </p-card>
+  
+  <div class="content p-4">
+    
+    <!-- Header con título y acciones -->
+    <div class="flex justify-content-between align-items-center mb-4">
+      <div class="flex align-items-center gap-2">
+        <i class="pi pi-users text-primary" style="font-size: 2rem"></i>
+        <h1 class="m-0 text-2xl font-bold">Gestión de Grupos</h1>
       </div>
-
-      <div class="col-12 md:col-3">
-        <p-card header="Pendiente">
-          <h2>{{pending}}</h2>
-        </p-card>
+      
+      <div class="flex gap-2">
+        <!-- Botón para crear nuevo grupo -->
+        <p-button
+          *ngIf="hasPermission('GROUP_CREATE')"
+          label="Nuevo Grupo"
+          icon="pi pi-plus"
+          severity="success"
+          (onClick)="showCreateDialog = true"
+          [outlined]="true"
+        ></p-button>
       </div>
-
-      <div class="col-12 md:col-3">
-        <p-card header="Progreso">
-          <h2>{{progress}}</h2>
-        </p-card>
-      </div>
-
-      <div class="col-12 md:col-3">
-        <p-card header="Hecho">
-          <h2>{{done}}</h2>
-        </p-card>
-      </div>
-
     </div>
 
-    <p-divider></p-divider>
-
-    <!-- BOTON -->
-    <p-button
-      label="Crear Ticket"
-      icon="pi pi-plus"
-      (click)="createTicket()">
-    </p-button>
-
-    <br><br>
-
-    <!-- TABLA -->
-    <p-table
-      [value]="tickets"
-      paginator
-      [rows]="5">
-
-      <ng-template pTemplate="header">
-        <tr>
-          <th>ID</th>
-          <th>Titulo</th>
-          <th>Estado</th>
-          <th>Asignado</th>
-          <th>Prioridad</th>
-        </tr>
-      </ng-template>
-
-      <ng-template pTemplate="body" let-ticket>
-        <tr>
-          <td>{{ticket.id}}</td>
-          <td>{{ticket.title}}</td>
-          <td>{{ticket.status}}</td>
-          <td>{{ticket.assignedTo}}</td>
-          <td>{{ticket.priority}}</td>
-        </tr>
-      </ng-template>
-
-    </p-table>
-
+    <!-- Dashboard de grupos - Vista de tarjetas -->
+    <div class="grid">
+      
+      <!-- Tarjeta de resumen -->
+      <div class="col-12">
+        <div class="surface-card p-3 border-round shadow-1 mb-3">
+          <div class="flex flex-wrap align-items-center justify-content-between">
+            <div class="flex align-items-center gap-2">
+              <span class="text-600">Total de grupos:</span>
+              <span class="font-bold text-xl">{{groups.length}}</span>
+            </div>
+            <div class="flex align-items-center gap-2">
+              <span class="text-600">Miembros totales:</span>
+              <span class="font-bold text-xl">{{totalMembers}}</span>
+            </div>
+            <div class="flex align-items-center gap-2">
+              <span class="text-600">Grupo activo:</span>
+              <span class="font-bold text-primary">{{selectedGroup?.name || 'Ninguno'}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Panel izquierdo - Lista de grupos -->
+      <div class="col-12 md:col-4">
+        <p-panel header="Mis Grupos" [toggleable]="true" [style]="{'height': '100%'}">
+          <div class="flex flex-column gap-2">
+            
+            <!-- Lista de grupos en tarjetas -->
+            <div *ngFor="let group of groups" 
+                 class="surface-card p-3 border-round shadow-1 group-card cursor-pointer"
+                 [class.selected-group]="selectedGroup?.id === group.id"
+                 (click)="selectGroup(group)">
+              
+              <div class="flex justify-content-between align-items-start">
+                <div class="flex flex-column gap-1">
+                  <div class="flex align-items-center gap-2">
+                    <i class="pi pi-folder text-primary"></i>
+                    <span class="font-bold">{{group.name}}</span>
+                  </div>
+                  <small class="text-600">{{group.description || 'Sin descripción'}}</small>
+                  <div class="flex align-items-center gap-2 mt-2">
+                    <i class="pi pi-users text-500" style="font-size: 0.9rem"></i>
+                    <span class="text-sm text-600">{{group.memberCount || 0}} miembros</span>
+                    <i class="pi pi-calendar text-500 ml-2" style="font-size: 0.9rem"></i>
+                    <span class="text-sm text-600">{{formatDate(group.createdAt)}}</span>
+                  </div>
+                </div>
+                
+                <div class="flex gap-1">
+                  <p-button
+                    *ngIf="hasPermission('GROUP_EDIT')"
+                    icon="pi pi-pencil"
+                    severity="info"
+                    [rounded]="true"
+                    [text]="true"
+                    (onClick)="editGroup(group); $event.stopPropagation()"
+                    pTooltip="Editar grupo"
+                    tooltipPosition="top"
+                  ></p-button>
+                  
+                  <p-button
+                    *ngIf="hasPermission('GROUP_DELETE')"
+                    icon="pi pi-trash"
+                    severity="danger"
+                    [rounded]="true"
+                    [text]="true"
+                    (onClick)="confirmDeleteGroup(group); $event.stopPropagation()"
+                    pTooltip="Eliminar grupo"
+                    tooltipPosition="top"
+                  ></p-button>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Mensaje si no hay grupos -->
+            <div *ngIf="groups.length === 0" class="text-center p-4">
+              <i class="pi pi-folder-open text-400" style="font-size: 3rem"></i>
+              <p class="text-600">No hay grupos creados</p>
+              <p-button
+                *ngIf="hasPermission('GROUP_CREATE')"
+                label="Crear primer grupo"
+                icon="pi pi-plus"
+                severity="success"
+                (onClick)="showCreateDialog = true"
+              ></p-button>
+            </div>
+          </div>
+        </p-panel>
+      </div>
+      
+      <!-- Panel derecho - Detalles del grupo seleccionado -->
+      <div class="col-12 md:col-8" *ngIf="selectedGroup">
+        <p-panel [header]="selectedGroup.name" [toggleable]="true">
+          
+          <!-- Información del grupo -->
+          <div class="grid">
+            <div class="col-12">
+              <div class="surface-ground p-3 border-round">
+                <p class="m-0">{{selectedGroup.description || 'Sin descripción'}}</p>
+                <small class="text-600">Creado por: {{selectedGroup.createdBy}} | {{formatDate(selectedGroup.createdAt)}}</small>
+              </div>
+            </div>
+            
+            <!-- Sección para añadir usuarios -->
+            <div class="col-12 md:col-5">
+              <h4 class="mt-2 mb-2">Añadir Miembro</h4>
+              <div class="flex flex-column gap-2">
+                <div class="p-inputgroup">
+                  <input
+                    pInputText
+                    placeholder="Correo del usuario"
+                    [(ngModel)]="emailToAdd"
+                    [disabled]="!hasPermission('GROUP_ADD_USER')"
+                    (keyup.enter)="addUser()"
+                    class="w-full"
+                  />
+                  <p-button
+                    label="Agregar"
+                    icon="pi pi-user-plus"
+                    (onClick)="addUser()"
+                    [disabled]="!hasPermission('GROUP_ADD_USER')"
+                  ></p-button>
+                </div>
+                
+                <!-- Lista de usuarios disponibles -->
+                <div *ngIf="availableUsers.length > 0 && hasPermission('GROUP_ADD_USER')" class="mt-2">
+                  <small class="text-secondary">Usuarios disponibles:</small>
+                  <div class="flex flex-column gap-1 mt-1">
+                    <div *ngFor="let user of availableUsers.slice(0,3)" class="text-sm flex align-items-center gap-2">
+                      <i class="pi pi-user text-500"></i>
+                      <span>{{user.name}}</span>
+                      <span class="text-500 text-xs">({{user.email}})</span>
+                    </div>
+                    <div *ngIf="availableUsers.length > 3" class="text-sm text-secondary">
+                      y {{availableUsers.length - 3}} más...
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Lista de miembros del grupo -->
+            <div class="col-12 md:col-7">
+              <h4 class="mt-2 mb-2">Miembros ({{groupMembers.length}})</h4>
+              <p-table
+                [value]="groupMembers"
+                [paginator]="groupMembers.length > 5"
+                [rows]="5"
+                [rowsPerPageOptions]="[5,10,20]"
+                [showCurrentPageReport]="false"
+                styleClass="p-datatable-sm"
+              >
+                <ng-template pTemplate="header">
+                  <tr>
+                    <th>Usuario</th>
+                    <th>Rol</th>
+                    <th style="width: 80px">Acciones</th>
+                  </tr>
+                </ng-template>
+                
+                <ng-template pTemplate="body" let-user>
+                  <tr>
+                    <td>
+                      <div class="flex align-items-center gap-2">
+                        <p-avatar
+                          [label]="getInitials(user.name)"
+                          styleClass="mr-2"
+                          shape="circle"
+                          [style]="{'background-color': user.role === 'superAdmin' ? '#ef4444' : (user.role === 'admin' ? '#f59e0b' : '#3b82f6')}"
+                        ></p-avatar>
+                        <div class="flex flex-column">
+                          <span>{{user.name}}</span>
+                          <small class="text-500">{{user.email}}</small>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <p-tag
+                        [value]="user.role || 'user'"
+                        [severity]="getRoleSeverity(user.role)"
+                      ></p-tag>
+                    </td>
+                    <td>
+                      <div class="flex gap-2">
+                        <p-button
+                          *ngIf="hasPermission('GROUP_DELETE_USER') && user.email !== currentUser?.email"
+                          icon="pi pi-trash"
+                          severity="danger"
+                          [rounded]="true"
+                          [text]="true"
+                          (onClick)="confirmRemoveUser(user)"
+                          pTooltip="Eliminar del grupo"
+                          tooltipPosition="top"
+                        ></p-button>
+                        
+                        <span
+                          *ngIf="user.email === currentUser?.email"
+                          class="text-secondary text-xs"
+                        >(Tú)</span>
+                      </div>
+                    </td>
+                  </tr>
+                </ng-template>
+                
+                <ng-template pTemplate="emptymessage">
+                  <tr>
+                    <td colspan="3" class="text-center p-4">
+                      No hay miembros en este grupo
+                    </td>
+                  </tr>
+                </ng-template>
+              </p-table>
+            </div>
+          </div>
+          
+        </p-panel>
+      </div>
+      
+      <!-- Mensaje si no hay grupo seleccionado -->
+      <div *ngIf="!selectedGroup && groups.length > 0" class="col-12 md:col-8">
+        <p-panel header="Selecciona un grupo">
+          <div class="text-center p-6">
+            <i class="pi pi-folder-open text-400" style="font-size: 3rem"></i>
+            <h4 class="text-600">Selecciona un grupo de la lista para ver sus detalles</h4>
+          </div>
+        </p-panel>
+      </div>
+      
+    </div>
+    
   </div>
-
 </div>
+
+<!-- Diálogo para crear nuevo grupo -->
+<p-dialog
+  [(visible)]="showCreateDialog"
+  header="Crear Nuevo Grupo"
+  [modal]="true"
+  [style]="{ width: '450px' }"
+  [draggable]="false"
+  [closable]="true"
+>
+  <div class="flex flex-column gap-3">
+    <div class="field">
+      <label for="newGroupName">Nombre del Grupo <span class="text-danger">*</span></label>
+      <input
+        id="newGroupName"
+        pInputText
+        [(ngModel)]="groupName"
+        class="w-full"
+        placeholder="Ej: Equipo de Desarrollo"
+        autofocus
+      />
+    </div>
+    
+    <div class="field">
+      <label for="newGroupDescription">Descripción</label>
+      <textarea
+        id="newGroupDescription"
+        pInputTextarea
+        [(ngModel)]="groupDescription"
+        class="w-full"
+        placeholder="Descripción del grupo..."
+        rows="3"
+        autoResize
+      ></textarea>
+    </div>
+  </div>
+  
+  <ng-template pTemplate="footer">
+    <p-button
+      label="Cancelar"
+      icon="pi pi-times"
+      (onClick)="showCreateDialog = false; groupName = ''; groupDescription = ''"
+      class="p-button-text"
+    ></p-button>
+    <p-button
+      label="Crear Grupo"
+      icon="pi pi-check"
+      (onClick)="createGroup()"
+      severity="success"
+      [disabled]="!groupName.trim()"
+    ></p-button>
+  </ng-template>
+</p-dialog>
+
+<!-- Diálogo para editar grupo -->
+<p-dialog
+  [(visible)]="showEditDialog"
+  header="Editar Grupo"
+  [modal]="true"
+  [style]="{ width: '450px' }"
+  [draggable]="false"
+  [closable]="true"
+>
+  <div class="flex flex-column gap-3" *ngIf="selectedGroup">
+    <div class="field">
+      <label for="editGroupName">Nombre del Grupo <span class="text-danger">*</span></label>
+      <input
+        id="editGroupName"
+        pInputText
+        [(ngModel)]="groupName"
+        class="w-full"
+      />
+    </div>
+    
+    <div class="field">
+      <label for="editGroupDescription">Descripción</label>
+      <textarea
+        id="editGroupDescription"
+        pInputTextarea
+        [(ngModel)]="groupDescription"
+        class="w-full"
+        rows="3"
+        autoResize
+      ></textarea>
+    </div>
+  </div>
+  
+  <ng-template pTemplate="footer">
+    <p-button
+      label="Cancelar"
+      icon="pi pi-times"
+      (onClick)="showEditDialog = false"
+      class="p-button-text"
+    ></p-button>
+    <p-button
+      label="Guardar Cambios"
+      icon="pi pi-save"
+      (onClick)="saveGroup()"
+      severity="success"
+      [disabled]="!groupName.trim()"
+    ></p-button>
+  </ng-template>
+</p-dialog>

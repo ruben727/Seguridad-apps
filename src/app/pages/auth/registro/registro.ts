@@ -21,7 +21,7 @@ import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
 
-// 🔹 VALIDADOR QUE NO PERMITE SOLO ESPACIOS
+// 🔹 VALIDADOR: NO PERMITIR SOLO ESPACIOS
 export const noSoloEspaciosValidator: ValidatorFn = (
   control: AbstractControl
 ): ValidationErrors | null => {
@@ -34,7 +34,7 @@ export const noSoloEspaciosValidator: ValidatorFn = (
 };
 
 
-// 🔹 VALIDADOR MAYOR DE EDAD
+// 🔹 VALIDADOR: MAYOR DE EDAD
 export const mayorDeEdadValidator: ValidatorFn = (
   control: AbstractControl
 ): ValidationErrors | null => {
@@ -55,7 +55,7 @@ export const mayorDeEdadValidator: ValidatorFn = (
 };
 
 
-// 🔹 VALIDAR QUE LAS CONTRASEÑAS COINCIDAN
+// 🔹 VALIDADOR: CONTRASEÑAS IGUALES
 export const passwordsIgualesValidator: ValidatorFn = (
   group: AbstractControl
 ): ValidationErrors | null => {
@@ -65,6 +65,7 @@ export const passwordsIgualesValidator: ValidatorFn = (
 
   return pass === confirmar ? null : { noCoinciden: true };
 };
+
 
 
 @Component({
@@ -94,6 +95,7 @@ export class Registro {
   constructor(private fb: FormBuilder, private router: Router) {
 
     this.form = this.fb.group({
+
       usuario: ['', [
         Validators.required,
         Validators.minLength(4),
@@ -136,20 +138,24 @@ export class Registro {
       confirmarPassword: ['', [
         Validators.required,
         noSoloEspaciosValidator
-      ]],
+      ]]
 
     }, { validators: passwordsIgualesValidator });
+
   }
 
 
-  // 🔹 Mostrar errores
+  // 🔹 FUNCIÓN PARA MOSTRAR ERRORES EN HTML
   error(campo: string, tipo: string) {
+
     const control = this.form.get(campo);
+
     return (control?.touched || this.enviado) && control?.hasError(tipo);
+
   }
 
 
-  // 🔹 Registrar
+  // 🔹 REGISTRAR USUARIO
   registrar() {
 
     this.enviado = true;
@@ -159,16 +165,48 @@ export class Registro {
       return;
     }
 
-    // 🔥 LIMPIAR ESPACIOS antes de enviar
-    const datosLimpios = Object.fromEntries(
+    // LIMPIAR ESPACIOS
+    const datos = Object.fromEntries(
       Object.entries(this.form.value).map(([key, value]) => [
         key,
         typeof value === 'string' ? value.trim() : value
       ])
     );
 
-    console.log('Registro exitoso:', datosLimpios);
+   const nuevoUsuario = {
+
+  name: datos['usuario'],
+  email: datos['email'],
+  password: datos['password'],
+
+  role: 'user',
+
+  permissions: [
+    'VIEW_TICKET'
+  ]
+
+};
+
+    const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
+
+    const existe = usuarios.find((u:any) => u.email === nuevoUsuario.email);
+
+    if (existe) {
+
+      alert('Este correo ya está registrado');
+
+      return;
+
+    }
+
+    usuarios.push(nuevoUsuario);
+
+    localStorage.setItem('usuarios', JSON.stringify(usuarios));
+
+    alert('Usuario registrado correctamente');
 
     this.router.navigate(['/login']);
+
   }
+
 }
